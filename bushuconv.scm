@@ -32,9 +32,10 @@
 (require-extension (srfi 1))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
+(require "bushuconv-rule.scm")
 
-(set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
+(set! tutcode-use-kigou2-mode? #t)
 
 (define bushuconv-context-rec-spec
   (append
@@ -52,12 +53,17 @@
 
 (define bushuconv-init-handler
   (lambda (id im arg)
-    (set! tutcode-rule '()) ; XXX: should save old tutcode-rule
-    (set! tutcode-rule-filename bushuconv-rule-filename)
+    (set! tutcode-kigou-rule '()) ; XXX: should save old tutcode-kigou-rule
+    (set! tutcode-kigou-rule bushuconv-rule)
+    (set! tutcode-kigou-rule-stroke-help-top-page-alist
+      bushuconv-rule-stroke-help-top-page-alist)
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
+      (tutcode-context-set-rk-context-another!
+        tc (rk-context-new tutcode-kigou-rule #t #f))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
+      (tutcode-toggle-kigou2-mode tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       pc)))
 
