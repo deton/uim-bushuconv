@@ -33,6 +33,9 @@
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
 
+(set! tutcode-use-stroke-help-window? #t)
+(set! tutcode-show-stroke-help-window-on-no-input? #t)
+
 (define bushuconv-context-rec-spec
   (append
     context-rec-spec
@@ -49,6 +52,7 @@
 
 (define bushuconv-init-handler
   (lambda (id im arg)
+    (set! tutcode-rule '()) ; XXX: should save old tutcode-rule
     (set! tutcode-rule-filename bushuconv-rule-filename)
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
