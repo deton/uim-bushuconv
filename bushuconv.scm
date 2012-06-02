@@ -37,6 +37,26 @@
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
 (set! tutcode-use-kigou2-mode? #t)
 
+(define bushuconv-heading-label-char-list-for-prediction-qwerty
+  '("a" "s" "d" "f" "g"  "h" "j" "k" "l" ";"
+    "z" "x" "c" "v" "b"  "n" "m" "," "." "/"
+    "Q" "W" "E" "R" "T"  "Y" "U" "I" "O" "P"
+    "A" "S" "D" "F" "G"  "H" "J" "K" "L" "+"
+    "Z" "X" "C" "V" "B"  "N" "M" "<" ">" "?"))
+(set! tutcode-heading-label-char-list-for-prediction-qwerty
+  bushuconv-heading-label-char-list-for-prediction-qwerty)
+
+(define bushuconv-heading-label-char-list-for-prediction-dvorak
+  '("a" "s" "d" "f" "g"  "h" "j" "k" "l" ";"
+    "z" "x" "c" "v" "b"  "n" "m" "," "." "/"
+    "\"" "<" ">" "P" "Y" "F" "G" "C" "R" "L"
+    "A" "O" "E" "U" "I"  "D" "H" "T" "N" "S"
+    ":" "Q" "J" "K" "X"  "B" "M" "W" "V" "Z"))
+(set! tutcode-heading-label-char-list-for-prediction-dvorak
+  bushuconv-heading-label-char-list-for-prediction-dvorak)
+(set! tutcode-heading-label-char-list-for-prediction
+  bushuconv-heading-label-char-list-for-prediction-qwerty)
+
 (define bushuconv-context-rec-spec
   (append
     context-rec-spec
@@ -59,10 +79,10 @@
       bushuconv-rule-stroke-help-top-page-alist)
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
-      (tutcode-context-set-rk-context-another!
-        tc (rk-context-new tutcode-kigou-rule #t #f))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
+      (tutcode-context-set-rk-context-another!
+        tc (rk-context-new tutcode-kigou-rule #t #f))
       (tutcode-toggle-kigou2-mode tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       pc)))
