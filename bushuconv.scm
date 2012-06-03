@@ -64,7 +64,8 @@
   (append
     context-rec-spec
     (list
-      (list 'tc #f))))
+      (list 'tc #f)
+      (list 'help-index 0))))
 
 (define-record 'bushuconv-context bushuconv-context-rec-spec)
 (define bushuconv-context-new-internal bushuconv-context-new)
@@ -95,22 +96,67 @@
   (tutcode-release-handler (bushuconv-context-tc pc)))
 
 (define (bushuconv-key-press-handler pc key key-state)
+  (define (change-help-index pc tc num)
+    (let* ((nr-all (length (tutcode-context-stroke-help tc)))
+           (idx (bushuconv-context-help-index pc))
+           (n (+ idx num))
+           (compensated-n
+            (cond
+             ((>= n nr-all) 0)
+             ((< n 0) (- nr-all 1))
+             (else n))))
+      (bushuconv-context-set-help-index! pc compensated-n)
+      (tutcode-select-candidate tc compensated-n)))
+  (define (stroke-help-selection-keys? pc tc key key-state)
+    (and
+      (eq? (tutcode-context-candidate-window tc)
+            'tutcode-candidate-window-stroke-help)
+      ;; stroke-helpは表形式候補ウィンドウ用なので選択やページ切替非対応
+      (not (or (eq? candidate-window-style 'table)
+                tutcode-use-pseudo-table-style?))
+      (cond
+        ((tutcode-next-page-key? key key-state)
+          (change-help-index pc tc tutcode-nr-candidate-max-for-kigou-mode)
+          #t)
+        ((tutcode-prev-page-key? key key-state)
+          (change-help-index pc tc (- tutcode-nr-candidate-max-for-kigou-mode))
+          #t)
+        ((tutcode-next-candidate-key? key key-state)
+          (change-help-index pc tc 1)
+          #t)
+        ((tutcode-prev-candidate-key? key key-state)
+          (change-help-index pc tc -1)
+          #t)
+        ;; stroke help上の候補確定を、ラベルに対応するキーの入力として処理
+        ((or (tutcode-commit-key? key key-state)
+             (tutcode-return-key? key key-state))
+          (let*
+            ((idx (bushuconv-context-help-index pc))
+             (label (cadr (list-ref (tutcode-context-stroke-help tc) idx)))
+             (key (string->ichar label)))
+            (bushuconv-key-press-handler pc key 0))
+          #t)
+        (else
+          #f))))
   (if (ichar-control? key)
     (im-commit-raw pc)
     (let ((tc (bushuconv-context-tc pc)))
       (cond
+        ((stroke-help-selection-keys? pc tc key key-state)
+          )
         ((bushuconv-switch-default-im-key? key key-state)
           (im-switch-im pc default-im-name))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (if (not (eq? (tutcode-context-state tc)
-                        'tutcode-state-interactive-bushu)) ;; after commit
+                        'tutcode-state-interactive-bushu)) ; after commit
             (if bushuconv-switch-default-im-after-commit
               (im-switch-im pc default-im-name)
               (begin
                 (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
                 (tutcode-context-set-prediction-nr! tc 0))))
           (tutcode-update-preedit tc)
+          (bushuconv-context-set-help-index! pc 0)
           (tutcode-check-stroke-help-window-begin tc))))))
 
 (define (bushuconv-key-release-handler pc key state)
