@@ -101,6 +101,21 @@
     ("ヰ" "(舛)")
     ("3" "(森、轟、晶)")))
 
+(define bushuconv-widgets '(widget_bushuconv_input_mode))
+(define default-widget_bushuconv_input_mode 'action_bushuconv_bushuconv)
+(define bushuconv-input-mode-actions '(action_bushuconv_bushuconv))
+(register-action 'action_bushuconv_bushuconv
+                 (lambda (pc)
+                  '(nonexisticon "部" "部首合成" "部首合成変換モード"))
+                 (lambda (pc)
+                  #t)
+                 (lambda (pc)
+                  ;; bushuconv IMへの切替直後にstroke-helpウィンドウ表示のため
+                  (bushuconv-update-preedit pc)))
+(register-widget 'widget_bushuconv_input_mode
+                 (activity-indicator-new bushuconv-input-mode-actions)
+                 (actions-new bushuconv-input-mode-actions))
+
 (define bushuconv-context-rec-spec
   (append
     context-rec-spec
@@ -114,6 +129,7 @@
 (define bushuconv-context-new
   (lambda args
     (let ((pc (apply bushuconv-context-new-internal args)))
+      (bushuconv-context-set-widgets! pc bushuconv-widgets)
       pc)))
 
 (define bushuconv-init-handler
@@ -135,6 +151,15 @@
 (define (bushuconv-release-handler pc)
   (im-deactivate-candidate-selector pc)
   (tutcode-release-handler (bushuconv-context-tc pc)))
+
+(define (bushuconv-update-preedit pc)
+  (let ((tc (bushuconv-context-tc pc)))
+    (tutcode-update-preedit tc)
+    (bushuconv-context-set-help-index! pc 0)
+    (tutcode-check-stroke-help-window-begin tc)
+    (if (eq? (tutcode-context-candidate-window tc)
+              'tutcode-candidate-window-stroke-help)
+      (tutcode-select-candidate tc 0))))
 
 (define (bushuconv-key-press-handler pc key key-state)
   (define (change-help-index pc tc num)
@@ -196,12 +221,7 @@
               (begin
                 (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
                 (tutcode-context-set-prediction-nr! tc 0))))
-          (tutcode-update-preedit tc)
-          (bushuconv-context-set-help-index! pc 0)
-          (tutcode-check-stroke-help-window-begin tc)
-          (if (eq? (tutcode-context-candidate-window tc)
-                    'tutcode-candidate-window-stroke-help)
-            (tutcode-select-candidate tc 0)))))))
+          (bushuconv-update-preedit pc))))))
 
 (define (bushuconv-key-release-handler pc key state)
   (tutcode-key-release-handler (bushuconv-context-tc pc) key state))
