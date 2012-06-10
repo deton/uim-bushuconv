@@ -112,9 +112,11 @@
                  (lambda (pc)
                   ;; bushuconv IMへの切替直後にstroke-helpウィンドウ表示のため
                   (bushuconv-update-preedit pc)))
-(register-widget 'widget_bushuconv_input_mode
-                 (activity-indicator-new bushuconv-input-mode-actions)
-                 (actions-new bushuconv-input-mode-actions))
+(define (bushuconv-configure-widgets)
+  (register-widget 'widget_bushuconv_input_mode
+                   (activity-indicator-new bushuconv-input-mode-actions)
+                   (actions-new bushuconv-input-mode-actions)))
+(bushuconv-configure-widgets)
 
 (define bushuconv-context-rec-spec
   (append
@@ -129,7 +131,6 @@
 (define bushuconv-context-new
   (lambda args
     (let ((pc (apply bushuconv-context-new-internal args)))
-      (bushuconv-context-set-widgets! pc bushuconv-widgets)
       pc)))
 
 (define bushuconv-init-handler
@@ -146,6 +147,13 @@
         tc (rk-context-new tutcode-kigou-rule #t #f))
       (tutcode-toggle-kigou2-mode tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
+      (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
+      ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
+      ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する
+      ;; (widgetの初期化が完了する前にdefault-activityが呼ばれるのが原因?)
+      (if (tutcode-candidate-window-enable-delay? tc
+            tutcode-candidate-window-activate-delay-for-stroke-help)
+        (bushuconv-context-set-widgets! pc bushuconv-widgets))
       pc)))
 
 (define (bushuconv-release-handler pc)
