@@ -35,7 +35,6 @@
 
 (set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
-(set! tutcode-use-kigou2-mode? #t)
 (if (not (or (eq? candidate-window-style 'table)
               tutcode-use-pseudo-table-style?))
   (set! tutcode-auto-help-with-real-keys? #t))
