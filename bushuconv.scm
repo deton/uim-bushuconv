@@ -169,6 +169,17 @@
               'tutcode-candidate-window-stroke-help)
       (tutcode-select-candidate tc 0))))
 
+;;; 漢字が確定された場合、再度対話的な部首合成変換モードに入る
+(define (bushuconv-check-post-commit pc tc)
+  (if (not (eq? (tutcode-context-state tc) 'tutcode-state-interactive-bushu))
+    (if bushuconv-switch-default-im-after-commit
+      (im-switch-im pc default-im-name)
+      (begin
+        (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
+        (tutcode-context-set-prediction-nr! tc 0)
+        (bushuconv-update-preedit pc)))
+    (bushuconv-update-preedit pc)))
+
 (define (bushuconv-key-press-handler pc key key-state)
   (define (change-help-index pc tc num)
     (let* ((nr-all (length (tutcode-context-stroke-help tc)))
@@ -223,14 +234,7 @@
           (im-switch-im pc default-im-name))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
-          (if (not (eq? (tutcode-context-state tc)
-                        'tutcode-state-interactive-bushu)) ; after commit
-            (if bushuconv-switch-default-im-after-commit
-              (im-switch-im pc default-im-name)
-              (begin
-                (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
-                (tutcode-context-set-prediction-nr! tc 0))))
-          (bushuconv-update-preedit pc))))))
+          (bushuconv-check-post-commit pc tc))))))
 
 (define (bushuconv-key-release-handler pc key state)
   (tutcode-key-release-handler (bushuconv-context-tc pc) key state))
@@ -273,7 +277,9 @@
         (if (= new-page prev-page)
           (tutcode-set-candidate-index-handler tc idx)
           (tutcode-select-candidate tc idx)))
-      (tutcode-set-candidate-index-handler tc idx))))
+      (begin
+        (tutcode-set-candidate-index-handler tc idx)
+        (bushuconv-check-post-commit pc tc)))))
 
 (define (bushuconv-delay-activating-handler pc)
   (tutcode-delay-activating-handler (bushuconv-context-tc pc)))
