@@ -275,7 +275,10 @@
          (new-page (quotient idx page-limit)))
         (bushuconv-context-set-help-index! pc idx)
         (if (= new-page prev-page)
-          (tutcode-set-candidate-index-handler tc idx)
+          (begin
+            (tutcode-set-candidate-index-handler tc idx)
+            ;; top stroke-helpで選択された次のstroke-helpでマウスでの選択可能に
+            (bushuconv-update-preedit pc))
           (tutcode-select-candidate tc idx)))
       (begin
         (tutcode-set-candidate-index-handler tc idx)
