@@ -7,6 +7,13 @@
                      bushuconv-im-name-label
                      bushuconv-im-short-desc)
 
+(define-custom 'bushuconv-rule-filename
+  (string-append (sys-pkgdatadir) "/bushuconv-rule.scm")
+  '(bushuconv)
+  '(pathname regular-file)
+  (N_ "Bushu input rule file")
+  (N_ "long description will be here."))
+
 (define-custom 'bushuconv-switch-default-im-after-commit #f
                '(bushuconv)
                '(boolean)

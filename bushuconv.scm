@@ -32,7 +32,6 @@
 (require-extension (srfi 1))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
-(require "bushuconv-rule.scm")
 
 (set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
@@ -136,16 +135,14 @@
 
 (define bushuconv-init-handler
   (lambda (id im arg)
-    (set! tutcode-kigou-rule bushuconv-rule)
-    (set! tutcode-kigou-rule-stroke-help-top-page-alist
-      bushuconv-rule-stroke-help-top-page-alist)
+    (set! tutcode-rule '()) ; XXX: should save old tutcode-rule
+    (set! tutcode-rule-filename bushuconv-rule-filename)
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
-      (tutcode-context-set-rk-context-another!
-        tc (rk-context-new tutcode-kigou-rule #t #f))
-      (tutcode-toggle-kigou2-mode tc)
+      (set! tutcode-stroke-help-top-page-alist
+        bushuconv-rule-stroke-help-top-page-alist)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
       ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
