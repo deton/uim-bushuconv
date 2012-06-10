@@ -240,7 +240,9 @@
   (tutcode-key-release-handler (bushuconv-context-tc pc) key state))
 
 (define (bushuconv-reset-handler pc)
-  (tutcode-reset-handler (bushuconv-context-tc pc)))
+  (let ((tc (bushuconv-context-tc pc)))
+    (tutcode-reset-handler tc)
+    (tutcode-update-preedit tc))) ; 次のIMに切替えた時preeditが残らないように
 
 (define (bushuconv-get-candidate-handler pc idx accel-enum-hint)
   (let*
