@@ -185,7 +185,8 @@
     (and
       (eq? (tutcode-context-candidate-window tc)
             'tutcode-candidate-window-stroke-help)
-      ;; stroke-helpは表形式候補ウィンドウ用なので選択やページ切替非対応
+      ;; stroke-helpはもともと表形式候補ウィンドウ用なので
+      ;; 選択やページ切替非対応のためbushuconv IMで対応
       (not (or (eq? candidate-window-style 'table)
                 tutcode-use-pseudo-table-style?))
       (cond
@@ -247,6 +248,7 @@
           (not (or (eq? candidate-window-style 'table)
                     tutcode-use-pseudo-table-style?))
           (< 0 (length (rk-context-seq (tutcode-context-rk-context tc)))))
+      ;; annotationを付与(「ア」をこざとへんとして扱っている等)
       (let ((ann (assoc (car cand-label-ann) bushuconv-bushu-annotation-alist)))
         (if ann
           (append (take cand-label-ann 2) (list (cadr ann)))
@@ -254,7 +256,24 @@
       cand-label-ann)))
 
 (define (bushuconv-set-candidate-index-handler pc idx)
-  (tutcode-set-candidate-index-handler (bushuconv-context-tc pc) idx))
+  (let ((tc (bushuconv-context-tc pc)))
+    ;; stroke-helpはもともと表形式候補ウィンドウ用なので、candwin上で前/次
+    ;; ページボタンが押された時のページ切替え非対応のためbushuconv IMで対応
+    (if (and
+          (eq? (tutcode-context-candidate-window tc)
+                'tutcode-candidate-window-stroke-help)
+          (not (or (eq? candidate-window-style 'table)
+                    tutcode-use-pseudo-table-style?)))
+      (let*
+        ((page-limit tutcode-nr-candidate-max-for-kigou-mode)
+         (prev (bushuconv-context-help-index pc))
+         (prev-page (quotient prev page-limit))
+         (new-page (quotient idx page-limit)))
+        (bushuconv-context-set-help-index! pc idx)
+        (if (= new-page prev-page)
+          (tutcode-set-candidate-index-handler tc idx)
+          (tutcode-select-candidate tc idx)))
+      (tutcode-set-candidate-index-handler tc idx))))
 
 (define (bushuconv-delay-activating-handler pc)
   (tutcode-delay-activating-handler (bushuconv-context-tc pc)))
