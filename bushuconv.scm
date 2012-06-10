@@ -34,6 +34,7 @@
 (require-custom "bushuconv-custom.scm")
 (require "bushuconv-rule.scm")
 
+(set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
 (set! tutcode-use-kigou2-mode? #t)
 (if (not (or (eq? candidate-window-style 'table)
@@ -135,7 +136,6 @@
 
 (define bushuconv-init-handler
   (lambda (id im arg)
-    (set! tutcode-kigou-rule '()) ; XXX: should save old tutcode-kigou-rule
     (set! tutcode-kigou-rule bushuconv-rule)
     (set! tutcode-kigou-rule-stroke-help-top-page-alist
       bushuconv-rule-stroke-help-top-page-alist)
