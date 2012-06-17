@@ -33,6 +33,11 @@
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
 
+;; XXX: stroke-help candwinクリックすると
+;; gtk2/immodule/uim-cand-win-vertical-gtkがSEGVする。delay版で回避
+(set! tutcode-candidate-window-use-delay? #t)
+(set! tutcode-candidate-window-activate-delay-for-stroke-help 1)
+
 (set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
 (set! tutcode-show-pending-rk? #t)
