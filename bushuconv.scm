@@ -290,7 +290,10 @@
   (tutcode-focus-in-handler (bushuconv-context-tc pc)))
 
 (define (bushuconv-focus-out-handler pc)
-  (tutcode-focus-out-handler (bushuconv-context-tc pc)))
+  ;; delay表示時、stroke-help candwinクリックでfocus-outする場合がある模様。
+  ;; tutcode-focus-out-handler内でrk-flushされると困るので、呼ばない。
+  ;(tutcode-focus-out-handler (bushuconv-context-tc pc))
+  #f)
 
 (register-im
  'bushuconv
