@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Uim-bushuconv by deton</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Uim-bushuconv</h1>
+        <p>Bushu conversion input method for uim.</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/deton/uim-bushuconv" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/deton/uim-bushuconv/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/deton/uim-bushuconv/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>uim-bushuconv</h1>
+
+<p>uim-bushuconvは、部首合成変換を行うための
+<a href="http://code.google.com/p/uim/">uim</a>用IMです。</p>
+
+<h1>インストール</h1>
+
+<p>./install.sh</p>
+
+<h1>準備</h1>
+
+<p>uim-pref-gtkやuim-pref-qt4を起動し、
+「全体設定」→「使用可能にする入力方式」を編集し、
+"bushuconv"を有効にしてください。</p>
+
+<p>キーボードを使ってbushuconv IMに切り替えるには、
+「ホットキーによる入力方式の一時切り替えを有効にする」を
+チェックしてください。</p>
+
+<h1>使用方法</h1>
+
+<p>uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
+(アイコン: <img src="https://github.com/deton/uim-bushuconv/raw/master/pixmaps/bushuconv.png" alt="アイコン">)
+に切り替えます。</p>
+
+<h1>キーと処理の対応</h1>
+
+<ul>
+<li>1    画数1の部首候補を表示</li>
+<li>2    画数2の部首候補を表示</li>
+<li>3    画数3の部首候補を表示</li>
+<li>4    画数4の部首候補を表示</li>
+<li>5    画数5の部首候補を表示</li>
+<li>6    画数6の部首候補を表示</li>
+<li>7    画数7の部首候補を表示</li>
+<li>8    画数8の部首候補を表示</li>
+<li>9    画数9の部首候補を表示</li>
+<li>0    画数10の部首候補を表示</li>
+<li>q    画数11の部首候補を表示</li>
+<li>w    画数12の部首候補を表示</li>
+<li>e    画数13の部首候補を表示</li>
+<li>r    画数14の部首候補を表示</li>
+<li>t    画数15の部首候補を表示</li>
+<li>y    画数17の部首候補を表示</li>
+<li>u    その他の部首候補を表示</li>
+<li>~      デフォルトのIMに切り替える</li>
+</ul><h1>カスタマイズ項目</h1>
+
+<ul>
+<li>コミット後にデフォルトIMに切り替えるかどうか (デフォルト: #f)</li>
+</ul>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/deton">deton</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
