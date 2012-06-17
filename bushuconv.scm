@@ -38,6 +38,7 @@
 (set! tutcode-candidate-window-use-delay? #t)
 (set! tutcode-candidate-window-activate-delay-for-stroke-help 1)
 
+(set! tutcode-use-interactive-bushu-conversion? #t)
 (set! tutcode-use-stroke-help-window? #t)
 (set! tutcode-show-stroke-help-window-on-no-input? #t)
 (set! tutcode-show-pending-rk? #t)
