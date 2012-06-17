@@ -20,7 +20,7 @@
                (N_ "switch to default IM after commit")
                (N_ "long description will be here."))
 
-(define-custom 'bushuconv-switch-default-im-key '("<IgnoreShift>~")
+(define-custom 'bushuconv-switch-default-im-key '("<IgnoreShift>~" "<IgnoreCase><Control>g")
                '(bushuconv)
 	       '(key)
 	       (N_ "[bushuconv] switch to default IM")
