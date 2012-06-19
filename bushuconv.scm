@@ -56,8 +56,8 @@
   bushuconv-heading-label-char-list-for-prediction-qwerty)
 
 (define bushuconv-heading-label-char-list-for-prediction-dvorak
-  '("a" "s" "d" "f" "g"  "h" "j" "k" "l" ";"
-    "z" "x" "c" "v" "b"  "n" "m" "," "." "/"
+  '("a" "o" "e" "u" "i"  "d" "h" "t" "n" "s"
+    ";" "q" "j" "k" "x"  "b" "m" "w" "v" "z"
     "\"" "<" ">" "P" "Y" "F" "G" "C" "R" "L"
     "A" "O" "E" "U" "I"  "D" "H" "T" "N" "S"
     ":" "Q" "J" "K" "X"  "B" "M" "W" "V" "Z"))
@@ -141,6 +141,16 @@
 
 (define bushuconv-init-handler
   (lambda (id im arg)
+    (define (translate-stroke-help-alist lis translate-alist)
+      (map
+        (lambda (elem)
+          (cons
+            (let ((res (assoc (car elem) translate-alist)))
+              (if res
+                (cadr res)
+                (car elem)))
+            (cdr elem)))
+        lis))
     (set! tutcode-rule '()) ; XXX: should save old tutcode-rule
     (set! tutcode-rule-filename bushuconv-rule-filename)
     (let ((pc (bushuconv-context-new id im))
@@ -148,7 +158,11 @@
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
       (set! tutcode-stroke-help-top-page-alist
-        bushuconv-rule-stroke-help-top-page-alist)
+        (if tutcode-use-dvorak?
+          (translate-stroke-help-alist
+            bushuconv-rule-stroke-help-top-page-alist
+            tutcode-rule-qwerty-to-dvorak-alist)
+          bushuconv-rule-stroke-help-top-page-alist))
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
       ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
