@@ -36,12 +36,10 @@
 ;; XXX: stroke-help candwinクリックすると
 ;; gtk2/immodule/uim-cand-win-vertical-gtkがSEGVする。delay版で回避
 (set! tutcode-candidate-window-use-delay? #t)
-(set! tutcode-candidate-window-activate-delay-for-stroke-help 1)
+(if (>= 0 tutcode-candidate-window-activate-delay-for-stroke-help)
+  (set! tutcode-candidate-window-activate-delay-for-stroke-help 1))
 
 (set! tutcode-use-interactive-bushu-conversion? #t)
-(set! tutcode-use-stroke-help-window? #t)
-(set! tutcode-show-stroke-help-window-on-no-input? #t)
-(set! tutcode-show-pending-rk? #t)
 (if (not (or (eq? candidate-window-style 'table)
               tutcode-use-pseudo-table-style?))
   (set! tutcode-auto-help-with-real-keys? #t))
@@ -52,19 +50,21 @@
     "Q" "W" "E" "R" "T"  "Y" "U" "I" "O" "P"
     "A" "S" "D" "F" "G"  "H" "J" "K" "L" "+"
     "Z" "X" "C" "V" "B"  "N" "M" "<" ">" "?"))
-(set! tutcode-heading-label-char-list-for-prediction-qwerty
-  bushuconv-heading-label-char-list-for-prediction-qwerty)
-
 (define bushuconv-heading-label-char-list-for-prediction-dvorak
   '("a" "o" "e" "u" "i"  "d" "h" "t" "n" "s"
     ";" "q" "j" "k" "x"  "b" "m" "w" "v" "z"
     "\"" "<" ">" "P" "Y" "F" "G" "C" "R" "L"
     "A" "O" "E" "U" "I"  "D" "H" "T" "N" "S"
     ":" "Q" "J" "K" "X"  "B" "M" "W" "V" "Z"))
-(set! tutcode-heading-label-char-list-for-prediction-dvorak
-  bushuconv-heading-label-char-list-for-prediction-dvorak)
-(set! tutcode-heading-label-char-list-for-prediction
-  bushuconv-heading-label-char-list-for-prediction-qwerty)
+
+(define bushuconv-save-tutcode-heading-label-char-list-for-prediction #f)
+(define bushuconv-save-tutcode-heading-label-char-list-for-prediction-dvorak #f)
+(define bushuconv-save-tutcode-use-stroke-help-window? #f)
+(define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
+(define bushuconv-save-tutcode-show-pending-rk? #f)
+(define bushuconv-save-tutcode-rule #f)
+(define bushuconv-save-tutcode-rule-filename #f)
+(define bushuconv-save-tutcode-stroke-help-top-page-alist #f)
 
 (define bushuconv-bushu-annotation-alist
   '(("1" "たてぼう (引 状 弔 个)")
@@ -151,13 +151,24 @@
                 (car elem)))
             (cdr elem)))
         lis))
-    (set! tutcode-rule '()) ; XXX: should save old tutcode-rule
-    (set! tutcode-rule-filename bushuconv-rule-filename)
+    (define (save-and-set! varsym value)
+      (set-symbol-value! (symbol-append 'bushuconv-save- varsym)
+        (symbol-value varsym))
+      (set-symbol-value! varsym value))
+    (save-and-set! 'tutcode-heading-label-char-list-for-prediction-dvorak
+      bushuconv-heading-label-char-list-for-prediction-dvorak)
+    (save-and-set! 'tutcode-heading-label-char-list-for-prediction
+      bushuconv-heading-label-char-list-for-prediction-qwerty)
+    (save-and-set! 'tutcode-use-stroke-help-window? #t)
+    (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
+    (save-and-set! 'tutcode-show-pending-rk? #t)
+    (save-and-set! 'tutcode-rule '())
+    (save-and-set! 'tutcode-rule-filename bushuconv-rule-filename)
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
-      (set! tutcode-stroke-help-top-page-alist
+      (save-and-set! 'tutcode-stroke-help-top-page-alist
         (if tutcode-use-dvorak?
           (translate-stroke-help-alist
             bushuconv-rule-stroke-help-top-page-alist
@@ -174,8 +185,19 @@
       pc)))
 
 (define (bushuconv-release-handler pc)
+  (define (restore-var! varsym)
+    (set-symbol-value! varsym
+      (symbol-value (symbol-append 'bushuconv-save- varsym))))
   (im-deactivate-candidate-selector pc)
-  (tutcode-release-handler (bushuconv-context-tc pc)))
+  (tutcode-release-handler (bushuconv-context-tc pc))
+  (restore-var! 'tutcode-heading-label-char-list-for-prediction-dvorak)
+  (restore-var! 'tutcode-heading-label-char-list-for-prediction)
+  (restore-var! 'tutcode-use-stroke-help-window?)
+  (restore-var! 'tutcode-show-stroke-help-window-on-no-input?)
+  (restore-var! 'tutcode-show-pending-rk?)
+  (restore-var! 'tutcode-rule)
+  (restore-var! 'tutcode-rule-filename)
+  (restore-var! 'tutcode-stroke-help-top-page-alist))
 
 (define (bushuconv-update-preedit pc)
   (let ((tc (bushuconv-context-tc pc)))
