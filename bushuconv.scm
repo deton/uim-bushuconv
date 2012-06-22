@@ -105,7 +105,7 @@
     ("ネ" "ねへん (社 祈)")
     ("ホ" "(痲)")
     ("ヰ" "(舛)")
-    ("3" "(森、轟、晶)")))
+    ("3(その他)" "「蟲」「毳」「橸」等、同じ部品3つから成る漢字の合成用")))
 
 (define bushuconv-widgets '(widget_bushuconv_input_mode))
 (define default-widget_bushuconv_input_mode 'action_bushuconv_bushuconv)
@@ -286,15 +286,17 @@
 (define (bushuconv-get-candidate-handler pc idx accel-enum-hint)
   (let*
     ((tc (bushuconv-context-tc pc))
-     (cand-label-ann (tutcode-get-candidate-handler tc idx accel-enum-hint)))
+     (cand-label-ann (tutcode-get-candidate-handler tc idx accel-enum-hint))
+     (cand (car cand-label-ann)))
     (if (and
           (eq? (tutcode-context-candidate-window tc)
                 'tutcode-candidate-window-stroke-help)
           (not (or (eq? candidate-window-style 'table)
                     tutcode-use-pseudo-table-style?))
-          (< 0 (length (rk-context-seq (tutcode-context-rk-context tc)))))
+          (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
+              (string=? cand "3(その他)")))
       ;; annotationを付与(「ア」をこざとへんとして扱っている等)
-      (let ((ann (assoc (car cand-label-ann) bushuconv-bushu-annotation-alist)))
+      (let ((ann (assoc cand bushuconv-bushu-annotation-alist)))
         (if ann
           (append (take cand-label-ann 2) (list (cadr ann)))
           cand-label-ann))
