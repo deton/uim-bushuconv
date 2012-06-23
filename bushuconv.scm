@@ -63,6 +63,7 @@
 (define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
 (define bushuconv-save-tutcode-show-pending-rk? #f)
 (define bushuconv-save-tutcode-rule #f)
+(define bushuconv-save-tutcode-reverse-rule-hash-table #f)
 (define bushuconv-save-tutcode-stroke-help-top-page-alist #f)
 
 (define bushuconv-bushu-annotation-alist
@@ -157,6 +158,7 @@
     (save-and-set! 'tutcode-use-stroke-help-window? #t)
     (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
     (save-and-set! 'tutcode-show-pending-rk? #t)
+    (save-and-set! 'tutcode-reverse-rule-hash-table '())
     (if tutcode-use-dvorak?
       (begin
         (save-and-set! 'tutcode-rule
@@ -196,6 +198,7 @@
   (restore-var! 'tutcode-use-stroke-help-window?)
   (restore-var! 'tutcode-show-stroke-help-window-on-no-input?)
   (restore-var! 'tutcode-show-pending-rk?)
+  (restore-var! 'tutcode-reverse-rule-hash-table)
   (restore-var! 'tutcode-rule)
   (restore-var! 'tutcode-heading-label-char-list-for-prediction)
   (restore-var! 'tutcode-stroke-help-top-page-alist))
