@@ -32,6 +32,7 @@
 (require-extension (srfi 1))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
+(require "bushuconv-rule.scm")
 
 ;; XXX: stroke-help candwinクリックすると
 ;; gtk2/immodule/uim-cand-win-vertical-gtkがSEGVする。delay版で回避
@@ -58,12 +59,10 @@
     ":" "Q" "J" "K" "X"  "B" "M" "W" "V" "Z"))
 
 (define bushuconv-save-tutcode-heading-label-char-list-for-prediction #f)
-(define bushuconv-save-tutcode-heading-label-char-list-for-prediction-dvorak #f)
 (define bushuconv-save-tutcode-use-stroke-help-window? #f)
 (define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
 (define bushuconv-save-tutcode-show-pending-rk? #f)
 (define bushuconv-save-tutcode-rule #f)
-(define bushuconv-save-tutcode-rule-filename #f)
 (define bushuconv-save-tutcode-stroke-help-top-page-alist #f)
 
 (define bushuconv-bushu-annotation-alist
@@ -155,25 +154,29 @@
       (set-symbol-value! (symbol-append 'bushuconv-save- varsym)
         (symbol-value varsym))
       (set-symbol-value! varsym value))
-    (save-and-set! 'tutcode-heading-label-char-list-for-prediction-dvorak
-      bushuconv-heading-label-char-list-for-prediction-dvorak)
-    (save-and-set! 'tutcode-heading-label-char-list-for-prediction
-      bushuconv-heading-label-char-list-for-prediction-qwerty)
     (save-and-set! 'tutcode-use-stroke-help-window? #t)
     (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
     (save-and-set! 'tutcode-show-pending-rk? #t)
-    (save-and-set! 'tutcode-rule '())
-    (save-and-set! 'tutcode-rule-filename bushuconv-rule-filename)
+    (if tutcode-use-dvorak?
+      (begin
+        (save-and-set! 'tutcode-rule
+          (tutcode-rule-qwerty-to-dvorak bushuconv-rule))
+        (save-and-set! 'tutcode-heading-label-char-list-for-prediction
+          bushuconv-heading-label-char-list-for-prediction-dvorak)
+        (save-and-set! 'tutcode-stroke-help-top-page-alist
+          (translate-stroke-help-alist
+            bushuconv-rule-stroke-help-top-page-alist
+            tutcode-rule-qwerty-to-dvorak-alist)))
+      (begin
+        (save-and-set! 'tutcode-rule bushuconv-rule)
+        (save-and-set! 'tutcode-heading-label-char-list-for-prediction
+          bushuconv-heading-label-char-list-for-prediction-qwerty)
+        (save-and-set! 'tutcode-stroke-help-top-page-alist
+          bushuconv-rule-stroke-help-top-page-alist)))
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
-      (save-and-set! 'tutcode-stroke-help-top-page-alist
-        (if tutcode-use-dvorak?
-          (translate-stroke-help-alist
-            bushuconv-rule-stroke-help-top-page-alist
-            tutcode-rule-qwerty-to-dvorak-alist)
-          bushuconv-rule-stroke-help-top-page-alist))
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
       ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
@@ -190,13 +193,11 @@
       (symbol-value (symbol-append 'bushuconv-save- varsym))))
   (im-deactivate-candidate-selector pc)
   (tutcode-release-handler (bushuconv-context-tc pc))
-  (restore-var! 'tutcode-heading-label-char-list-for-prediction-dvorak)
-  (restore-var! 'tutcode-heading-label-char-list-for-prediction)
   (restore-var! 'tutcode-use-stroke-help-window?)
   (restore-var! 'tutcode-show-stroke-help-window-on-no-input?)
   (restore-var! 'tutcode-show-pending-rk?)
   (restore-var! 'tutcode-rule)
-  (restore-var! 'tutcode-rule-filename)
+  (restore-var! 'tutcode-heading-label-char-list-for-prediction)
   (restore-var! 'tutcode-stroke-help-top-page-alist))
 
 (define (bushuconv-update-preedit pc)
