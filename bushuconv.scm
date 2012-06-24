@@ -325,6 +325,11 @@
           )
         ((bushuconv-switch-default-im-key? key key-state)
           (im-switch-im pc default-im-name))
+        ((and (bushuconv-commit-bushu-key? key key-state)
+              (pair? (tutcode-context-head tc)))
+          (tutcode-commit tc (string-list-concat (tutcode-context-head tc)))
+          (tutcode-flush tc)
+          (bushuconv-check-post-commit pc tc))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))

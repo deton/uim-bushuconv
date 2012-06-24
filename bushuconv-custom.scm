@@ -18,3 +18,9 @@
 	       '(key)
 	       (N_ "[bushuconv] switch to default IM")
 	       (N_ "long description will be here"))
+
+(define-custom 'bushuconv-commit-bushu-key '("tab")
+               '(bushuconv)
+	       '(key)
+	       (N_ "[bushuconv] commit this bushu")
+	       (N_ "long description will be here"))
