@@ -349,10 +349,18 @@
           (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
               (string=? cand "3(その他)")))
       ;; annotationを付与(「ア」をこざとへんとして扱っている等)
-      (let ((ann (assoc cand bushuconv-bushu-annotation-alist)))
-        (if ann
-          (append (take cand-label-ann 2) (list (cadr ann)))
-          cand-label-ann))
+      (let*
+        ((kanji-list (tutcode-bushu-included-char-list cand 1))
+         (spann (assoc cand bushuconv-bushu-annotation-alist))
+         (ann
+          (apply string-append
+            (append
+              (if spann
+                (cdr spann)
+                '(""))
+              '("\n")
+              kanji-list))))
+        (append (take cand-label-ann 2) (list ann)))
       cand-label-ann)))
 
 (define (bushuconv-set-candidate-index-handler pc idx)
