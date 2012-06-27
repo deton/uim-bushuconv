@@ -24,3 +24,9 @@
 	       '(key)
 	       (N_ "[bushuconv] commit this bushu")
 	       (N_ "long description will be here"))
+
+(define-custom 'bushuconv-kanji-as-bushu-key '("right")
+               '(bushuconv)
+	       '(key)
+	       (N_ "[bushuconv] use kanji as bushu")
+	       (N_ "long description will be here"))

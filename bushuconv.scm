@@ -309,7 +309,8 @@
           #t)
         ;; stroke help上の候補確定を、ラベルに対応するキーの入力として処理
         ((or (tutcode-commit-key? key key-state)
-             (tutcode-return-key? key key-state))
+             (tutcode-return-key? key key-state)
+             (bushuconv-kanji-as-bushu-key? key key-state))
           (let*
             ((idx (bushuconv-context-help-index pc))
              (label (cadr (list-ref (tutcode-context-stroke-help tc) idx)))
@@ -331,6 +332,15 @@
           (tutcode-commit tc (string-list-concat (tutcode-context-head tc)))
           (tutcode-flush tc)
           (bushuconv-check-post-commit pc tc))
+        ((and (bushuconv-kanji-as-bushu-key? key key-state)
+              (> (tutcode-context-prediction-nr tc) 0)) ; has-candidate?
+          (let ((str (tutcode-get-prediction-string tc
+                      (tutcode-context-prediction-index tc))))
+            (if str
+              (begin
+                (tutcode-context-set-head! tc (list str)) ;合成後の漢字を部首に
+                (tutcode-begin-interactive-bushu-conversion tc)
+                (bushuconv-update-preedit pc)))))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))
