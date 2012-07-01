@@ -76,6 +76,7 @@
 (define bushuconv-save-tutcode-rule #f)
 (define bushuconv-save-tutcode-reverse-rule-hash-table #f)
 (define bushuconv-save-tutcode-stroke-help-top-page-alist #f)
+(define bushuconv-save-tutcode-bushu-inhibited-output-chars #f)
 (define bushuconv-save-string-to-list #f)
 (define bushuconv-save-tutcode-euc-jp-string->ichar #f)
 (define bushuconv-save-tutcode-do-update-preedit #f)
@@ -96,6 +97,13 @@
                    (activity-indicator-new bushuconv-input-mode-actions)
                    (actions-new bushuconv-input-mode-actions)))
 (bushuconv-configure-widgets)
+
+;;; EUC-JP前提のuim-tutcodeをUTF-8で使うための差し換え用変数・関数
+
+(define bushuconv-bushu-inhibited-output-chars
+  '("え" "し" "へ" "ア" "イ" "ウ" "エ" "オ" "カ" "ク" "ケ" "サ" "シ"
+    "タ" "チ" "テ" "ト" "ニ" "ヌ" "ネ" "ノ" "ハ" "ヒ" "ホ" "ム" "メ"
+    "ヨ" "リ" "ル" "レ" "ロ" "ワ" "ン"))
 
 ;; string-to-list in deprecated-util.scm for "UTF-8"
 (define (bushuconv-string-to-list s)
@@ -189,6 +197,8 @@
     (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
     (save-and-set! 'tutcode-show-pending-rk? #t)
     (save-and-set! 'tutcode-reverse-rule-hash-table '())
+    (save-and-set! 'tutcode-bushu-inhibited-output-chars
+      bushuconv-bushu-inhibited-output-chars)
     (save-and-set! 'string-to-list bushuconv-string-to-list)
     (save-and-set! 'tutcode-euc-jp-string->ichar bushuconv-utf8-string->ichar)
     (save-and-set! 'tutcode-do-update-preedit bushuconv-do-update-preedit)
@@ -235,7 +245,7 @@
       tutcode-show-stroke-help-window-on-no-input? tutcode-show-pending-rk?
       tutcode-reverse-rule-hash-table tutcode-rule
       tutcode-heading-label-char-list-for-prediction 
-      tutcode-stroke-help-top-page-alist
+      tutcode-stroke-help-top-page-alist tutcode-bushu-inhibited-output-chars
       string-to-list tutcode-euc-jp-string->ichar tutcode-do-update-preedit)))
 
 (define (bushuconv-update-preedit pc)
