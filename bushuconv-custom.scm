@@ -7,18 +7,6 @@
                      bushuconv-im-name-label
                      bushuconv-im-short-desc)
 
-(define-custom 'bushuconv-bushu-index2-filename ""
-  '(bushuconv)
-  '(pathname regular-file)
-  (N_ "bushu.index2 file (UTF-8)")
-  (N_ "long description will be here."))
-
-(define-custom 'bushuconv-bushu-expand-filename ""
-  '(bushuconv)
-  '(pathname regular-file)
-  (N_ "bushu.expand file (UTF-8)")
-  (N_ "long description will be here."))
-
 (define-custom 'bushuconv-bushu-help-filename ""
   '(bushuconv)
   '(pathname regular-file)
