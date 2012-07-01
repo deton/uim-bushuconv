@@ -354,7 +354,7 @@
       (let*
         ((kanji-list (tutcode-bushu-included-char-list cand 1))
          (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
-         (kakusu (car (rk-context-seq (tutcode-context-rk-context tc))))
+         (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
          (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
          (altcand
           (cond
