@@ -34,8 +34,8 @@
 (require-custom "bushuconv-custom.scm")
 (require "bushuconv-rule.scm")
 
-;; XXX: stroke-help candwin¥¯¥ê¥Ã¥¯¤¹¤ë¤È
-;; gtk2/immodule/uim-cand-win-vertical-gtk¤¬SEGV¤¹¤ë¡£delayÈÇ¤Ç²óÈò
+;; XXX: stroke-help candwinã‚¯ãƒªãƒƒã‚¯ã™ã‚‹ã¨
+;; gtk2/immodule/uim-cand-win-vertical-gtkãŒSEGVã™ã‚‹ã€‚delayç‰ˆã§å›é¿
 (set! tutcode-candidate-window-use-delay? #t)
 (if (>= 0 tutcode-candidate-window-activate-delay-for-stroke-help)
   (set! tutcode-candidate-window-activate-delay-for-stroke-help 1))
@@ -58,6 +58,11 @@
     "A" "O" "E" "U" "I"  "D" "H" "T" "N" "S"
     ":" "Q" "J" "K" "X"  "B" "M" "W" "V" "Z"))
 
+(define bushuconv-save-tutcode-bushu-index2-filename #f)
+(define bushuconv-save-tutcode-bushu-expand-filename #f)
+(define bushuconv-save-tutcode-bushu-help-filename #f)
+(define bushuconv-save-tutcode-bushu-help #f)
+(define bushuconv-save-tutcode-bushu-for-char-hash-table #f)
 (define bushuconv-save-tutcode-heading-label-char-list-for-prediction #f)
 (define bushuconv-save-tutcode-use-stroke-help-window? #f)
 (define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
@@ -65,115 +70,119 @@
 (define bushuconv-save-tutcode-rule #f)
 (define bushuconv-save-tutcode-reverse-rule-hash-table #f)
 (define bushuconv-save-tutcode-stroke-help-top-page-alist #f)
+(define bushuconv-save-string-to-list #f)
+(define bushuconv-save-tutcode-euc-jp-string->ichar #f)
+(define bushuconv-save-tutcode-do-update-preedit #f)
 
-;;; stroke-help candwinÍÑ¤ÎannotationÄÉ²Ã¤äÂåÂØ¸õÊäÊ¸»úÎó¤Ø¤ÎÃÖ´¹ÍÑalist¡£
-;;; ("¸õÊä" "annotation" (("²è¿ô" "ÂåÂØ¸õÊäÊ¸»úÎó")))
+;;; stroke-help candwinç”¨ã®annotationè¿½åŠ ã‚„ä»£æ›¿å€™è£œæ–‡å­—åˆ—ã¸ã®ç½®æ›ç”¨alistã€‚
+;;; ("å€™è£œ" "annotation" (("ç”»æ•°" "ä»£æ›¿å€™è£œæ–‡å­—åˆ—")))
 (define bushuconv-bushu-annotation-alist
-  '(("1" "¤¿¤Æ¤Ü¤¦ (°ú ¾õ Ä¤ Ğ¤)")
-    ("7" "(¸¸ À® Ğ¢)")
-    ("¤¯" "(×À ¸ß ´¤)")
-    ("¤·" "(µÚ ¾æ Ìè Ğ©)")
-    ("¤í" "(Çµ µÚ)")
-    ("¥ì" "(»¥ Ìà ¶Ä)")
-    ("²µ" "(¸ğ ¶å ´İ ¿×)")
-    ("Ğ¦" "¤Æ¤ó (´¤ ¼Û ¿Ï ËŞ)")
-    ("Ğ¨" "(²ğ ¾¯ Ôğ Ö¥)")
-    ("Ğ­" "¤Ï¤Í¤Ü¤¦ (»ö Ğ¯)")
-    ;; 2²è
-    ("5" "(µà ¹æ ¹Í Í¿ Òø)")
-    ("¤¤" "(°Ê)")
-    ("¤¦" "(±Ê)")
-    ("¤Ø" "(²ğ º£ Í¾ ¼Ë)")
-    ("¤è" "(çĞ)")
-    ("¥¤" "¤Ë¤ó¤Ù¤ó (²½ Âå)" "¥¤ (¤Ë¤ó¤Ù¤ó)")
-    ("¥¯" "(¿§ ´í Áè Ôë Øë)")
-    ("¥³" "(µğ ²Ë ¼¯)")
-    ("¥½" "(±Ù Á¾ µÕ È¾ Ê¿ Öõ)")
-    ("¥È" "¤Ü¤¯¤Î¤È (³° Àê Âî Ú½)")
-    ("¥Ê" "(±¦ º¸ ÉÛ Ìà Í§ Í­)")
-    ("¥Ş" "(ÄÌ Í¦)")
-    ("¥á" "(´¢ ¶§ ¶è ºè »¦ ¼¤ Çı)")
-    ("¥é" "(º£)")
-    ("¥ê" "¤ê¤Ã¤È¤¦ (Íø Îó)")
-    ("É÷" "(½È Âü Æä Ë± / Éö Íò áæ éÍ ëå ñ¤ ñ¦)" (("2" "(É÷)"))) ; 2²è / 9²è
-    ;; 3²è
-    ("4" "(¼ı¡¢à­)")
-    ("¥¢" "¤³¤¶¤È¤Ø¤ó (°¤ Î´)" "¥¢ (¤³¤¶¤È¤Ø¤ó)")
-    ("Éô" "¤ª¤ª¤¶¤È (¹Ù Ë®)" "(Éô) (¤ª¤ª¤¶¤È)")
-    ("¥ª" "¤Æ¤Ø¤ó (ÂÇ Ê§)" "¥ª (¤Æ¤Ø¤ó)")
-    ("À­" "¤ê¤Ã¤·¤ó¤Ù¤ó (²÷ ¾ğ)" "(À­-À¸) (¤ê¤Ã¤·¤ó¤Ù¤ó)")
-    ("ÆÈ" "¤±¤â¤Î¤Ø¤ó (¼í Ç­)" "(ÆÈ-Ãî) (¤±¤â¤Î¤Ø¤ó)")
-    ("Ç·" "¤·¤ó¤Ë¤ç¤¦ (¿Ê ¹ş)" "Ç· (¤·¤ó¤Ë¤ç¤¦)")
-    ("¥­" "(È¾ Êô)")
-    ("¥±" "(Ãİ ¸ğ Õõ)")
-    ("¥µ" "¤¯¤µ¤«¤ó¤à¤ê (Áğ ³©)" "¥µ (¤¯¤µ¤«¤ó¤à¤ê)")
-    ("¥·" "¤µ¤ó¤º¤¤ (³¤ ÇÈ)" "¥· (¤µ¤ó¤º¤¤)")
-    ("¥Ä" "(á· óë Ã±)")
-    ("¥è" "(¿» Åö)")
-    ("Óø" "¤¯¤Ë¤¬¤Ş¤¨ (¹ñ ¸Ç)")
-    ;; 4²è
-    ("¤¨" "2ÅÀ¤·¤ó¤Ë¤ç¤¦ (íè ô£ î±)" "¤¨ (2ÅÀ¤·¤ó¤Ë¤ç¤¦)")
-    ("¥Í" "¤Í¤Ø¤ó (¼Ò µ§)")
-    ("¥Û" "(áä)")
-    ("¥ğ" "(Á¤)")
-    ("³«" "³«-Ìç (·º ·Á ¸¦ È¯)" "(³«-Ìç)")
-    ("ÄÀ" "ÄÀ-¥· (Ã¿ Ëí)" "(ÄÀ-¥·)")
-    ("ÅÀ" "¤ì¤Ã¤«/¤ì¤ó¤¬ (¾Ç Á³)" "(ÅÀ-Àê) (¤ì¤Ã¤«/¤ì¤ó¤¬)")
-    ;; 5²è
-    ("³Ø" "³Ø-»Ò (±Ä ±É ³Ğ ·Ö Ï« ²©)" "(³Ø-»Ò)")
-    ("¼Â" "¼Â-Õß (½Õ ¿Á ÁÕ ÂÙ Êô çÎ)" "(¼Â-Õß)")
-    ("½é" "¤³¤í¤â¤Ø¤ó (Âµ Èï)" "(½é-Åá) (¤³¤í¤â¤Ø¤ó)")
-    ("ÅÅ" "ÅÅ-±« (±â µµ Îµ Æì óæ)" "(ÅÅ-±«)")
-    ("Çä" "(°í ÄÛ Ôå ÕÖ / ³Ì Â³)" (("5" "(Çä-Ñ¹)"))) ; 5²è / 7²è
-    ("ÉÂ" "¤ä¤Ş¤¤¤À¤ì (±Ö ÄË)" "(ÉÂ-Êº) (¤ä¤Ş¤¤¤À¤ì)")
-    ("ÊÂ" "(µõ ¶È ¿¸ Éá ËÍ Îî Ü® óã)" (("5" "(ÊÂ¤Î²¼Â¦)"))) ; 5²è / 8²è
-    ("»Í" "¤¢¤ß¤¬¤·¤é (ºá ÃÖ)")
-    ;; 6²è
-    ("´Ø" "´Ø-Ìç (ºé Á÷ Ä¿ Ş¼ ï±)" "(´Ø-Ìç)")
-    ("¼õ" "(ÂÅ ½Ø ¼ß / ¼ø ¼ú)" (("6" "(¼õ-Ëô)"))) ; 6²è / 8²è
-    ("ÄÉ" "ÄÉ-Ç· (»Õ ¿ã Éì)" "(ÄÉ-Ç·)")
-    ("ÇÉ" "ÇÉ-¥· (Ì®)" "(ÇÉ-¥·)")
-    ;; 7²è
-    ("ÅÙ" "(½î ÀÊ / ÅÏ ÅÕ)" (("7" "(ÅÙ-Ëô)"))) ; 7²è / 9²è
-    ("Î®" "Î®-¥· (ÁÁ Î° Î² ÚØ Ûà İÚ îÑ)" "(Î®-¥·)")
-    ;; 8²è
-    ("¸¡" "¸¡-ÌÚ (·ğ ·õ ¸± ¸³ ¸´ Ñû)" "(¸¡-ÌÚ)")
-    ("¿¼" "¿¼-¥· (Ãµ)" "(¿¼-¥·)")
-    ("Ä«" "(°¶ ´¥ ´´ ´Í ´Ú ·á / Ä¬ ÉÀ ÓŞ)" (("8" "(Ä«-·î)"))) ; 8²è / 12²è
-    ;; 9²è
-    ("¼¢" "¼¢-¥· (»ü ¼§)" "(¼¢-¥·)")
-    ("¼¾" "¼¾-¥· (¸² ğ®)" "(¼¾-¥·)")
-    ("¿·" "(¿Æ / ¿Å È¸)" (("9" "(¿·-¶Ô)"))) ; 9²è / 13²è
-    ("Éü" "(Ê¢ Ê£ Ø¿ éı íÖ ñÆ òØ / Ê¤ Íú)" (("9" "(Éü-×Æ)"))) ; 9²è / 12²è
-    ;; 10²è
-    ("´¨" "´¨-ÑÒ (ºÉ Ùë ÜÍ ëé ìĞ í¡ ñÚ)" "(´¨-ÑÒ)")
-    ("´Á" "´Á-¥· (Ã² Ã· Æñ çå)" "(´Á-¥·)")
-    ("Ò©" "Ò©-ÎÏ (ÜÆ ßé à¸ àò áô ê¥ òô)" "(Ò©-ÎÏ)")
-    ;; 11²è
-    ("èÁ" "(¶Ï ¶Ğ ¶à Üİ à÷ ë³ ñ¼)")
-    ;; 12²è
-    ("ÎÀ" "ÎÀ-Õß (·ä Î½ ÎÅ ÎÆ ÎË Ùü Û¢ ß³ ßù åç ïÁ ó¾)" "(ÎÀ-Õß)")
-    ;; 13²è
-    ("ê÷" "(¾í ¾î ¾÷ ¾ù ¾ú / Ôá ÕĞ Ú· Û¨ ãº ãÕ ìª îÖ ñè)") ; 13²è / 17²è
-    ;; ¤½¤ÎÂ¾
-    ("3(¤½¤ÎÂ¾)" "¡Öêµ¡×¡ÖİŞ¡×¡ÖÜñ¡×Åù¡¢Æ±¤¸ÉôÉÊ3¤Ä¤«¤éÀ®¤ë´Á»ú¤Î¹çÀ®ÍÑ")))
+  '(("ã" "(å·›)")
+    ("ãƒ•" "(å¹»)")
+    ("L" "(ç›´ æ–­)")
+    ("ä¹€" "(åˆ„ åŠ)")
+    ;; 2ç”»
+    ("ã‚½" "(ä¸¦ å¹¶ æŒŸ æ›½ æŸ¬ ç‚º)")
+    ("ãƒ¦" "(ä¾¯)")
+    ("ãƒŠ" "(å³ å·¦ å¸ƒ å‹ æœ‰)")
+    ("ãƒ" "(é€š å‹‡)")
+    ;; 3ç”»
+    ("ã¿" "(å·³)" "ã¿ (å·³)")
+    ("ã‚­" "(å¥‰ æ´¥)")
+    ("ãƒ„" "(ç•„ é¼¡ å˜)")
+    ("å›—" "ãã«ãŒã¾ãˆ (å›½ å›º)")
+    ;; 4ç”»
+    ("ãƒ›" "(ä½™ æœ® èŒ¶)")
+    ("ãƒ°" "(èˆ›)")
+    ;; 5ç”»
+    ("é›»" "é›»-é›¨ (å¥„ ç«œ)" "(é›»-é›¨)")
+    ("å£²" "(å£± å£· å£¹ å­› / æ®» ç¶š)" (("5" "(å£²-å„¿)"))) ; 5ç”» / 7ç”»
+    ("ä¸¦" "(è™š æ™‹ æ™® éœŠ æ¤ª)" (("5" "(ä¸¦ã®ä¸‹å´)"))) ; 5ç”» / 8ç”»
+    ;; 6ç”»
+    ("å¤¾" "(å³¡ ç‹­ / ä¿  åŒ§)" (("6" "(å¤¹) {å¤¾}"))) ; 6ç”» / 7ç”»
+    ;; 7ç”»
+    ("å¯" "(å¯¢ å¯¤)" "(å¯¢-ä¾µ)")
+    ("åº¦" "(åº¶ å¸­ / æ¸¡ é)" (("7" "(åº¦-åˆ)"))) ; 7ç”» / 9ç”»
+    ;; 8ç”»
+    ("åƒ‰" "(å€¹ å‰£ æ¤œ / å„‰ åŠ åŒ³)" (("8" "(æ¤œ-æœ¨)"))) ; 8ç”» / 13ç”»
+    ;; 9ç”»
+    ("å ™" "å” (ç…™ æ¹® ç”„)" "(å”) (å ™-åœŸ)")
+    ;; 10ç”»
+    ("å¯’" "å¯’-å†« (å¡ æ´ å¯¨ è¬‡ è³½ è¹‡ é¨«)" "(å¯’-å†«)")
+    ;; 11ç”»
+    ("å—½" "æ¬¶ (æ¼± è”Œ)" "(æ¬¶) (å—½-å£)")
+    ;; 13ç”»
+    ("å£Š" "(æ‡ / è¤±)" (("e" "(å£Š-åœŸ)") ("y" "(è¤±) (å£Š-åœŸ)"))) ; 13ç”» / 16ç”»
+    ("è¥„" "(å£Œ å¬¢ ç©£ è­² é†¸ / å£¤ å­ƒ æ”˜ æ›© ç¦³ ç©° è®“ é‡€ é©¤)") ; 13ç”» / 17ç”»
+    ;; ãã®ä»–
+    ("3(ãã®ä»–)" "ã€ŒèŸ²ã€ã€Œæ¯³ã€ã€Œæ©¸ã€ç­‰ã€åŒã˜éƒ¨å“3ã¤ã‹ã‚‰æˆã‚‹æ¼¢å­—ã®åˆæˆç”¨")))
 
 (define bushuconv-widgets '(widget_bushuconv_input_mode))
 (define default-widget_bushuconv_input_mode 'action_bushuconv_bushuconv)
 (define bushuconv-input-mode-actions '(action_bushuconv_bushuconv))
 (register-action 'action_bushuconv_bushuconv
                  (lambda (pc)
-                  '(nonexisticon "Éô" "Éô¼ó¹çÀ®" "Éô¼ó¹çÀ®ÊÑ´¹¥â¡¼¥É"))
+                  '(nonexisticon "éƒ¨" "éƒ¨é¦–åˆæˆ" "éƒ¨é¦–åˆæˆå¤‰æ›ãƒ¢ãƒ¼ãƒ‰"))
                  (lambda (pc)
                   #t)
                  (lambda (pc)
-                  ;; bushuconv IM¤Ø¤ÎÀÚÂØÄ¾¸å¤Ëstroke-help¥¦¥£¥ó¥É¥¦É½¼¨¤Î¤¿¤á
+                  ;; bushuconv IMã¸ã®åˆ‡æ›¿ç›´å¾Œã«stroke-helpã‚¦ã‚£ãƒ³ãƒ‰ã‚¦è¡¨ç¤ºã®ãŸã‚
                   (bushuconv-update-preedit pc)))
 (define (bushuconv-configure-widgets)
   (register-widget 'widget_bushuconv_input_mode
                    (activity-indicator-new bushuconv-input-mode-actions)
                    (actions-new bushuconv-input-mode-actions)))
 (bushuconv-configure-widgets)
+
+;; string-to-list in deprecated-util.scm for "UTF-8"
+(define (bushuconv-string-to-list s)
+  (with-char-codec "UTF-8"
+    (lambda ()
+      (map! (lambda (c)
+              (let ((str (list->string (list c))))
+                (with-char-codec "ISO-8859-1"
+                  (lambda ()
+                    (%%string-reconstruct! str)))))
+            (reverse! (string->list s))))))
+
+;;; hash-tableã®ã‚­ãƒ¼ç”¨ã«ã€æ¼¢å­—1æ–‡å­—ã®æ–‡å­—åˆ—ã‹ã‚‰æ¼¢å­—ã‚³ãƒ¼ãƒ‰ã«å¤‰æ›ã™ã‚‹
+;;; @param s æ–‡å­—åˆ—
+;;; @return æ¼¢å­—ã‚³ãƒ¼ãƒ‰ã€‚æ–‡å­—åˆ—ã®é•·ã•ãŒ1ã§ãªã„å ´åˆã¯#f
+(define (bushuconv-utf8-string->ichar s)
+  ;; ichar.scmã®string->ichar(string->charcode)ã®UTF-8ç‰ˆ
+  (let ((sl (with-char-codec "UTF-8"
+              (lambda ()
+                (string->list s)))))
+    (cond
+      ((null? sl)
+        0)
+      ((null? (cdr sl))
+        (char->integer (car sl)))
+      (else
+        #f))))
+
+;;; UTF-8ã§"â–¼"ã‚’è¡¨ç¤ºã™ã‚‹ãŸã‚
+(define (bushuconv-do-update-preedit pc)
+  (let ((stat (tutcode-context-state pc))
+        (cpc (tutcode-context-child-context pc))
+        (cursor-shown? #f))
+    (case stat
+      ((tutcode-state-interactive-bushu)
+        (im-pushback-preedit pc preedit-none "â–¼")
+        (let ((h (string-list-concat (tutcode-context-head pc))))
+          (if (string? h)
+            (im-pushback-preedit pc preedit-none h)))
+        (if tutcode-show-pending-rk?
+          (im-pushback-preedit pc preedit-underline
+            (rk-pending (tutcode-context-rk-context pc))))
+        (im-pushback-preedit pc preedit-cursor "")
+        (set! cursor-shown? #t)
+        (if (> (tutcode-lib-get-nr-predictions pc) 0)
+          (begin
+            (im-pushback-preedit pc preedit-underline "=>")
+            (im-pushback-preedit pc preedit-underline
+              (tutcode-get-prediction-string pc
+                (tutcode-context-prediction-index pc))))))))) ; ç†Ÿèªã‚¬ã‚¤ãƒ‰ç„¡ã—
 
 (define bushuconv-context-rec-spec
   (append
@@ -206,10 +215,20 @@
       (set-symbol-value! (symbol-append 'bushuconv-save- varsym)
         (symbol-value varsym))
       (set-symbol-value! varsym value))
+    (save-and-set! 'tutcode-bushu-index2-filename
+      bushuconv-bushu-index2-filename)
+    (save-and-set! 'tutcode-bushu-expand-filename
+      bushuconv-bushu-expand-filename)
+    (save-and-set! 'tutcode-bushu-help-filename bushuconv-bushu-help-filename)
+    (save-and-set! 'tutcode-bushu-help '())
+    (save-and-set! 'tutcode-bushu-for-char-hash-table (make-hash-table =))
     (save-and-set! 'tutcode-use-stroke-help-window? #t)
     (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
     (save-and-set! 'tutcode-show-pending-rk? #t)
     (save-and-set! 'tutcode-reverse-rule-hash-table '())
+    (save-and-set! 'string-to-list bushuconv-string-to-list)
+    (save-and-set! 'tutcode-euc-jp-string->ichar bushuconv-utf8-string->ichar)
+    (save-and-set! 'tutcode-do-update-preedit bushuconv-do-update-preedit)
     (if tutcode-use-dvorak?
       (begin
         (save-and-set! 'tutcode-rule
@@ -231,10 +250,10 @@
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
-      (tutcode-update-preedit tc);XXX:¤³¤³¤Çstroke-help window¤òÉ½¼¨¤·¤Æ¤âÃæ¿È¶õ
-      ;; XXX: tutcode-candidate-window-use-delay?¤¬#f¤Î¾ì¹ç¡¢
-      ;; bushuconv¤ËÀÚÂØ¤¨¤¿»ş¤Ëwidget-configuration¤Çerror¤¬È¯À¸¤¹¤ë
-      ;; (widget¤Î½é´ü²½¤¬´°Î»¤¹¤ëÁ°¤Ëdefault-activity¤¬¸Æ¤Ğ¤ì¤ë¤Î¤¬¸¶°ø?)
+      (tutcode-update-preedit tc);XXX:ã“ã“ã§stroke-help windowã‚’è¡¨ç¤ºã—ã¦ã‚‚ä¸­èº«ç©º
+      ;; XXX: tutcode-candidate-window-use-delay?ãŒ#fã®å ´åˆã€
+      ;; bushuconvã«åˆ‡æ›¿ãˆãŸæ™‚ã«widget-configurationã§errorãŒç™ºç”Ÿã™ã‚‹
+      ;; (widgetã®åˆæœŸåŒ–ãŒå®Œäº†ã™ã‚‹å‰ã«default-activityãŒå‘¼ã°ã‚Œã‚‹ã®ãŒåŸå› ?)
       (if (tutcode-candidate-window-enable-delay? tc
             tutcode-candidate-window-activate-delay-for-stroke-help)
         (bushuconv-context-set-widgets! pc bushuconv-widgets))
@@ -246,13 +265,15 @@
       (symbol-value (symbol-append 'bushuconv-save- varsym))))
   (im-deactivate-candidate-selector pc)
   (tutcode-release-handler (bushuconv-context-tc pc))
-  (restore-var! 'tutcode-use-stroke-help-window?)
-  (restore-var! 'tutcode-show-stroke-help-window-on-no-input?)
-  (restore-var! 'tutcode-show-pending-rk?)
-  (restore-var! 'tutcode-reverse-rule-hash-table)
-  (restore-var! 'tutcode-rule)
-  (restore-var! 'tutcode-heading-label-char-list-for-prediction)
-  (restore-var! 'tutcode-stroke-help-top-page-alist))
+  (for-each restore-var!
+    '(tutcode-bushu-index2-filename tutcode-bushu-expand-filename
+      tutcode-bushu-help-filename tutcode-bushu-help
+      tutcode-bushu-for-char-hash-table tutcode-use-stroke-help-window?
+      tutcode-show-stroke-help-window-on-no-input? tutcode-show-pending-rk?
+      tutcode-reverse-rule-hash-table tutcode-rule
+      tutcode-heading-label-char-list-for-prediction 
+      tutcode-stroke-help-top-page-alist
+      string-to-list tutcode-euc-jp-string->ichar tutcode-do-update-preedit)))
 
 (define (bushuconv-update-preedit pc)
   (let ((tc (bushuconv-context-tc pc)))
@@ -263,7 +284,7 @@
               'tutcode-candidate-window-stroke-help)
       (tutcode-select-candidate tc 0))))
 
-;;; ´Á»ú¤¬³ÎÄê¤µ¤ì¤¿¾ì¹ç¡¢ºÆÅÙÂĞÏÃÅª¤ÊÉô¼ó¹çÀ®ÊÑ´¹¥â¡¼¥É¤ËÆş¤ë
+;;; æ¼¢å­—ãŒç¢ºå®šã•ã‚ŒãŸå ´åˆã€å†åº¦å¯¾è©±çš„ãªéƒ¨é¦–åˆæˆå¤‰æ›ãƒ¢ãƒ¼ãƒ‰ã«å…¥ã‚‹
 (define (bushuconv-check-post-commit pc tc)
   (if (not (eq? (tutcode-context-state tc) 'tutcode-state-interactive-bushu))
     (if bushuconv-switch-default-im-after-commit
@@ -290,8 +311,8 @@
     (and
       (eq? (tutcode-context-candidate-window tc)
             'tutcode-candidate-window-stroke-help)
-      ;; stroke-help¤Ï¤â¤È¤â¤ÈÉ½·Á¼°¸õÊä¥¦¥£¥ó¥É¥¦ÍÑ¤Ê¤Î¤Ç
-      ;; ÁªÂò¤ä¥Ú¡¼¥¸ÀÚÂØÈóÂĞ±ş¤Î¤¿¤ábushuconv IM¤ÇÂĞ±ş
+      ;; stroke-helpã¯ã‚‚ã¨ã‚‚ã¨è¡¨å½¢å¼å€™è£œã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”¨ãªã®ã§
+      ;; é¸æŠã‚„ãƒšãƒ¼ã‚¸åˆ‡æ›¿éå¯¾å¿œã®ãŸã‚bushuconv IMã§å¯¾å¿œ
       (not (or (eq? candidate-window-style 'table)
                 tutcode-use-pseudo-table-style?))
       (cond
@@ -307,7 +328,7 @@
         ((tutcode-prev-candidate-key? key key-state)
           (change-help-index pc tc -1)
           #t)
-        ;; stroke help¾å¤Î¸õÊä³ÎÄê¤ò¡¢¥é¥Ù¥ë¤ËÂĞ±ş¤¹¤ë¥­¡¼¤ÎÆşÎÏ¤È¤·¤Æ½èÍı
+        ;; stroke helpä¸Šã®å€™è£œç¢ºå®šã‚’ã€ãƒ©ãƒ™ãƒ«ã«å¯¾å¿œã™ã‚‹ã‚­ãƒ¼ã®å…¥åŠ›ã¨ã—ã¦å‡¦ç†
         ((or (tutcode-commit-key? key key-state)
              (tutcode-return-key? key key-state)
              (bushuconv-kanji-as-bushu-key? key key-state))
@@ -338,7 +359,7 @@
                       (tutcode-context-prediction-index tc))))
             (if str
               (begin
-                (tutcode-context-set-head! tc (list str)) ;¹çÀ®¸å¤Î´Á»ú¤òÉô¼ó¤Ë
+                (tutcode-context-set-head! tc (list str)) ;åˆæˆå¾Œã®æ¼¢å­—ã‚’éƒ¨é¦–ã«
                 (tutcode-begin-interactive-bushu-conversion tc)
                 (bushuconv-update-preedit pc)))))
         (else
@@ -351,7 +372,7 @@
 (define (bushuconv-reset-handler pc)
   (let ((tc (bushuconv-context-tc pc)))
     (tutcode-reset-handler tc)
-    (tutcode-update-preedit tc))) ; ¼¡¤ÎIM¤ËÀÚÂØ¤¨¤¿»şpreedit¤¬»Ä¤é¤Ê¤¤¤è¤¦¤Ë
+    (tutcode-update-preedit tc))) ; æ¬¡ã®IMã«åˆ‡æ›¿ãˆãŸæ™‚preeditãŒæ®‹ã‚‰ãªã„ã‚ˆã†ã«
 
 (define (bushuconv-get-candidate-handler pc idx accel-enum-hint)
   (let*
@@ -364,9 +385,9 @@
           (not (or (eq? candidate-window-style 'table)
                     tutcode-use-pseudo-table-style?))
           (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
-              (string=? cand "3(¤½¤ÎÂ¾)")))
-      ;; annotationÉÕÍ¿(¡Ö¥¢¡×¤ò¤³¤¶¤È¤Ø¤ó¤È¤·¤Æ°·¤Ã¤Æ¤¤¤ëÅù)¤È¡¢
-      ;; ÂåÂØ¸õÊäÊ¸»úÎó¤Ø¤ÎÃÖ´¹("À­"¢ª"(À­-À¸) (¤ê¤Ã¤·¤ó¤Ù¤ó)")
+              (string=? cand "3(ãã®ä»–)")))
+      ;; annotationä»˜ä¸(ã€Œã‚¢ã€ã‚’ã“ã–ã¨ã¸ã‚“ã¨ã—ã¦æ‰±ã£ã¦ã„ã‚‹ç­‰)ã¨ã€
+      ;; ä»£æ›¿å€™è£œæ–‡å­—åˆ—ã¸ã®ç½®æ›("æ€§"â†’"(æ€§-ç”Ÿ) (ã‚Šã£ã—ã‚“ã¹ã‚“)")
       (let*
         ((kanji-list (tutcode-bushu-included-char-list cand 1))
          (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
@@ -393,8 +414,8 @@
 
 (define (bushuconv-set-candidate-index-handler pc idx)
   (let ((tc (bushuconv-context-tc pc)))
-    ;; stroke-help¤Ï¤â¤È¤â¤ÈÉ½·Á¼°¸õÊä¥¦¥£¥ó¥É¥¦ÍÑ¤Ê¤Î¤Ç¡¢candwin¾å¤ÇÁ°/¼¡
-    ;; ¥Ú¡¼¥¸¥Ü¥¿¥ó¤¬²¡¤µ¤ì¤¿»ş¤Î¥Ú¡¼¥¸ÀÚÂØ¤¨ÈóÂĞ±ş¤Î¤¿¤ábushuconv IM¤ÇÂĞ±ş
+    ;; stroke-helpã¯ã‚‚ã¨ã‚‚ã¨è¡¨å½¢å¼å€™è£œã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”¨ãªã®ã§ã€candwinä¸Šã§å‰/æ¬¡
+    ;; ãƒšãƒ¼ã‚¸ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®ãƒšãƒ¼ã‚¸åˆ‡æ›¿ãˆéå¯¾å¿œã®ãŸã‚bushuconv IMã§å¯¾å¿œ
     (if (and
           (eq? (tutcode-context-candidate-window tc)
                 'tutcode-candidate-window-stroke-help)
@@ -409,7 +430,7 @@
         (if (= new-page prev-page)
           (begin
             (tutcode-set-candidate-index-handler tc idx)
-            ;; top stroke-help¤ÇÁªÂò¤µ¤ì¤¿¼¡¤Îstroke-help¤Ç¥Ş¥¦¥¹¤Ç¤ÎÁªÂò²ÄÇ½¤Ë
+            ;; top stroke-helpã§é¸æŠã•ã‚ŒãŸæ¬¡ã®stroke-helpã§ãƒã‚¦ã‚¹ã§ã®é¸æŠå¯èƒ½ã«
             (bushuconv-update-preedit pc))
           (tutcode-select-candidate tc idx)))
       (begin
@@ -423,15 +444,15 @@
   (tutcode-focus-in-handler (bushuconv-context-tc pc)))
 
 (define (bushuconv-focus-out-handler pc)
-  ;; delayÉ½¼¨»ş¡¢stroke-help candwin¥¯¥ê¥Ã¥¯¤Çfocus-out¤¹¤ë¾ì¹ç¤¬¤¢¤ëÌÏÍÍ¡£
-  ;; tutcode-focus-out-handlerÆâ¤Çrk-flush¤µ¤ì¤ë¤Èº¤¤ë¤Î¤Ç¡¢¸Æ¤Ğ¤Ê¤¤¡£
+  ;; delayè¡¨ç¤ºæ™‚ã€stroke-help candwinã‚¯ãƒªãƒƒã‚¯ã§focus-outã™ã‚‹å ´åˆãŒã‚ã‚‹æ¨¡æ§˜ã€‚
+  ;; tutcode-focus-out-handlerå†…ã§rk-flushã•ã‚Œã‚‹ã¨å›°ã‚‹ã®ã§ã€å‘¼ã°ãªã„ã€‚
   ;(tutcode-focus-out-handler (bushuconv-context-tc pc))
   #f)
 
 (register-im
  'bushuconv
  "ja"
- "EUC-JP"
+ "UTF-8"
  (N_ "bushuconv")
  (N_ "Bushu conversion")
  #f
