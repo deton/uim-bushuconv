@@ -71,6 +71,7 @@
 (define bushuconv-save-tutcode-bushu-help #f)
 (define bushuconv-save-tutcode-bushu-for-char-hash-table #f)
 (define bushuconv-save-tutcode-heading-label-char-list-for-prediction #f)
+(define bushuconv-save-tutcode-nr-candidate-max-for-prediction #f)
 (define bushuconv-save-tutcode-use-stroke-help-window? #f)
 (define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
 (define bushuconv-save-tutcode-show-pending-rk? #f)
@@ -219,6 +220,8 @@
           bushuconv-heading-label-char-list-for-prediction-qwerty)
         (save-and-set! 'tutcode-stroke-help-top-page-alist
           bushuconv-rule-stroke-help-top-page-alist)))
+    (save-and-set! 'tutcode-nr-candidate-max-for-prediction
+      (length tutcode-heading-label-char-list-for-prediction))
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
@@ -247,7 +250,8 @@
       tutcode-reverse-rule-hash-table tutcode-rule
       tutcode-heading-label-char-list-for-prediction 
       tutcode-stroke-help-top-page-alist tutcode-bushu-inhibited-output-chars
-      string-to-list tutcode-euc-jp-string->ichar tutcode-do-update-preedit)))
+      string-to-list tutcode-euc-jp-string->ichar tutcode-do-update-preedit
+      tutcode-nr-candidate-max-for-prediction)))
 
 (define (bushuconv-update-preedit pc)
   (let ((tc (bushuconv-context-tc pc)))
