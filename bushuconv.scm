@@ -73,6 +73,7 @@
 (define bushuconv-save-tutcode-heading-label-char-list-for-prediction #f)
 (define bushuconv-save-tutcode-nr-candidate-max-for-prediction #f)
 (define bushuconv-save-tutcode-use-stroke-help-window? #f)
+(define bushuconv-save-tutcode-use-auto-help-window? #f)
 (define bushuconv-save-tutcode-show-stroke-help-window-on-no-input? #f)
 (define bushuconv-save-tutcode-show-pending-rk? #f)
 (define bushuconv-save-tutcode-rule #f)
@@ -196,6 +197,8 @@
     (save-and-set! 'tutcode-bushu-help '())
     (save-and-set! 'tutcode-bushu-for-char-hash-table (make-hash-table =))
     (save-and-set! 'tutcode-use-stroke-help-window? #t)
+    ;; XXX: auto-helpオフ。uim-1.8.1のtutcode-bushu.scmのバグによるerror回避用
+    (save-and-set! 'tutcode-use-auto-help-window? #f)
     (save-and-set! 'tutcode-show-stroke-help-window-on-no-input? #t)
     (save-and-set! 'tutcode-show-pending-rk? #t)
     (save-and-set! 'tutcode-reverse-rule-hash-table '())
@@ -245,7 +248,8 @@
   (for-each restore-var!
     '(tutcode-bushu-index2-filename tutcode-bushu-expand-filename
       tutcode-bushu-help-filename tutcode-bushu-help
-      tutcode-bushu-for-char-hash-table tutcode-use-stroke-help-window?
+      tutcode-bushu-for-char-hash-table
+      tutcode-use-stroke-help-window? tutcode-use-auto-help-window?
       tutcode-show-stroke-help-window-on-no-input? tutcode-show-pending-rk?
       tutcode-reverse-rule-hash-table tutcode-rule
       tutcode-heading-label-char-list-for-prediction 
