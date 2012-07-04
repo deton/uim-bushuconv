@@ -364,14 +364,16 @@
     (if (and
           (eq? (tutcode-context-candidate-window tc)
                 'tutcode-candidate-window-stroke-help)
-          (not (or (eq? candidate-window-style 'table)
-                    tutcode-use-pseudo-table-style?))
           (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
               (string=? cand "3(その他)")))
       ;; annotation付与(「ア」をこざとへんとして扱っている等)と、
       ;; 代替候補文字列への置換("性"→"(性-生) (りっしんべん)")
       (let*
-        ((kanji-list (tutcode-bushu-included-char-list cand 1))
+        ((kanji-list
+          (if (or (eq? candidate-window-style 'table)
+                  tutcode-use-pseudo-table-style?)
+            '() ; 表形式候補ウィンドウはannotation表示未対応
+            (tutcode-bushu-included-char-list cand 1)))
          (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
          (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
          (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
