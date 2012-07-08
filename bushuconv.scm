@@ -252,7 +252,10 @@
         (save-and-set! 'tutcode-stroke-help-top-page-alist
           bushuconv-rule-stroke-help-top-page-alist)))
     (save-and-set! 'tutcode-nr-candidate-max-for-prediction
-      (length tutcode-heading-label-char-list-for-prediction))
+      (if (or (eq? candidate-window-style 'table)
+              tutcode-use-pseudo-table-style?)
+        (length tutcode-heading-label-char-list-for-prediction)
+        tutcode-nr-candidate-max-for-prediction))
     (let ((pc (bushuconv-context-new id im))
           (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
