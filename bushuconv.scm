@@ -84,7 +84,11 @@
     (tutcode-bushu-inhibited-output-chars)
     (string-to-list)
     (tutcode-euc-jp-string->ichar)
-    (tutcode-do-update-preedit)))
+    (tutcode-do-update-preedit)
+    (tutcode-bushu-compose-explicitly)))
+
+(define (bushuconv-saved-value varsym)
+  (cdr (assq varsym bushuconv-save-vars)))
 
 (define bushuconv-widgets '(widget_bushuconv_input_mode))
 (define default-widget_bushuconv_input_mode 'action_bushuconv_bushuconv)
@@ -160,6 +164,22 @@
               (tutcode-get-prediction-string pc
                 (tutcode-context-prediction-index pc))))))))) ; 熟語ガイド無し
 
+;;; 部首1つの場合、その部首を含む漢字のリストをindex2から取得する。
+;;; uim-tutcodeでは、部首を2つ以上入力することが前提のため、
+;;; 部首1つの場合にindex2の漢字リストが候補に含まれないが、
+;;; 部首合成変換IMとしては、部首1つの場合でも漢字候補は出したい。
+;;; (XXX:tutcode-bushu-weak-compose-setで1文字の場合に空を返すチェックを外せば
+;;; 含まれるようになるが、index2以外の大量の漢字が含まれるので、いまいち)
+(define (bushuconv-bushu-compose-explicitly char-list)
+  (let
+    ((exp ((bushuconv-saved-value 'tutcode-bushu-compose-explicitly) char-list))
+     (index2
+      (if (null? (cdr char-list)) ; 部首1つ?
+        (delete (car char-list)
+          (tutcode-bushu-lookup-index2-entry-internal (car char-list)))
+        '())))
+    (append exp index2)))
+
 (define bushuconv-context-rec-spec
   (append
     context-rec-spec
@@ -208,6 +228,8 @@
     (save-and-set! 'string-to-list bushuconv-string-to-list)
     (save-and-set! 'tutcode-euc-jp-string->ichar bushuconv-utf8-string->ichar)
     (save-and-set! 'tutcode-do-update-preedit bushuconv-do-update-preedit)
+    (save-and-set! 'tutcode-bushu-compose-explicitly
+      bushuconv-bushu-compose-explicitly)
     (if tutcode-use-dvorak?
       (begin
         (save-and-set! 'tutcode-rule
@@ -255,7 +277,8 @@
       tutcode-heading-label-char-list-for-prediction 
       tutcode-stroke-help-top-page-alist tutcode-bushu-inhibited-output-chars
       string-to-list tutcode-euc-jp-string->ichar tutcode-do-update-preedit
-      tutcode-nr-candidate-max-for-prediction)))
+      tutcode-nr-candidate-max-for-prediction
+      tutcode-bushu-compose-explicitly)))
 
 (define (bushuconv-update-preedit pc)
   (let ((tc (bushuconv-context-tc pc)))
@@ -373,7 +396,7 @@
           (if (or (eq? candidate-window-style 'table)
                   tutcode-use-pseudo-table-style?)
             '() ; 表形式候補ウィンドウはannotation表示未対応
-            (tutcode-bushu-included-char-list cand 1)))
+            (tutcode-bushu-lookup-index2-entry-internal cand)))
          (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
          (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
          (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
