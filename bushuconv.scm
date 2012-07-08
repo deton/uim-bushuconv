@@ -32,14 +32,19 @@
 (require-extension (srfi 1))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
-(require "bushuconv-rule.scm")
+
+(if (eq? bushuconv-kanjiset 'bushu12)
+  (require "bushuconv-rule12.scm")
+  (require "bushuconv-rule34.scm"))
 
 ;;; XXX: bushu34h+.index2は長い行があるためUTF-8が途中で切れてエラーになる。
 ;;; /usr/local/share/uim/bushuconv-data/bushu34h+.{index2,expand}
 (define bushuconv-bushu-index2-filename
-  (string-append (sys-pkgdatadir) "/bushuconv-data/bushu34.index2"))
+  (string-append (sys-pkgdatadir) "/bushuconv-data/"
+    (symbol->string bushuconv-kanjiset) ".index2"))
 (define bushuconv-bushu-expand-filename
-  (string-append (sys-pkgdatadir) "/bushuconv-data/bushu34.expand"))
+  (string-append (sys-pkgdatadir) "/bushuconv-data/"
+    (symbol->string bushuconv-kanjiset) ".expand"))
 
 ;; XXX: stroke-help candwinクリックすると
 ;; gtk2/immodule/uim-cand-win-vertical-gtkがSEGVする。delay版で回避
