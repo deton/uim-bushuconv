@@ -389,40 +389,49 @@
     ((tc (bushuconv-context-tc pc))
      (cand-label-ann (tutcode-get-candidate-handler tc idx accel-enum-hint))
      (cand (car cand-label-ann)))
-    (if (and
-          (eq? (tutcode-context-candidate-window tc)
-                'tutcode-candidate-window-stroke-help)
-          (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
-              (string=? cand "3(その他)")))
-      ;; annotation付与(「ア」をこざとへんとして扱っている等)と、
-      ;; 代替候補文字列への置換("性"→"(性-生) (りっしんべん)")
-      (let*
-        ((kanji-list
-          (if (or (eq? candidate-window-style 'table)
-                  tutcode-use-pseudo-table-style?)
-            '() ; 表形式候補ウィンドウはannotation表示未対応
-            (tutcode-bushu-lookup-index2-entry-internal cand)))
-         (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
-         (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
-         (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
-         (altcand
-          (cond
-            ((pair? altcands)
-              (cond
-                ((assoc kakusu altcands) => cadr)
-                (else #f)))
-            (else altcands)))
-         (newcand (or altcand (car cand-label-ann)))
-         (ann
-          (apply string-append
-            (append
-              (if spann-altcand
-                (list (cadr spann-altcand))
-                '(""))
-              '("\n")
-              kanji-list))))
-        (list newcand (cadr cand-label-ann) ann))
-      cand-label-ann)))
+    (cond
+      ;; 対話的な部首合成変換の漢字候補表示
+      ((eq? (tutcode-context-candidate-window tc)
+        'tutcode-candidate-window-interactive-bushu)
+        (let* ((ucs (bushuconv-utf8-string->ichar cand))
+               (ucsstr (if (number? ucs) (format "U+~X" ucs) "")))
+          (append (take cand-label-ann 2) (list ucsstr))))
+      ;; 仮想鍵盤
+      ((and
+        (eq? (tutcode-context-candidate-window tc)
+              'tutcode-candidate-window-stroke-help)
+        (or (pair? (rk-context-seq (tutcode-context-rk-context tc)))
+            (string=? cand "3(その他)")))
+        ;; annotation付与(「ア」をこざとへんとして扱っている等)と、
+        ;; 代替候補文字列への置換("性"→"(性-生) (りっしんべん)")
+        (let*
+          ((kanji-list
+            (if (or (eq? candidate-window-style 'table)
+                    tutcode-use-pseudo-table-style?)
+              '() ; 表形式候補ウィンドウはannotation表示未対応
+              (tutcode-bushu-lookup-index2-entry-internal cand)))
+           (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
+           (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
+           (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
+           (altcand
+            (cond
+              ((pair? altcands)
+                (cond
+                  ((assoc kakusu altcands) => cadr)
+                  (else #f)))
+              (else altcands)))
+           (newcand (or altcand (car cand-label-ann)))
+           (ann
+            (apply string-append
+              (append
+                (if spann-altcand
+                  (list (cadr spann-altcand))
+                  '(""))
+                '("\n")
+                kanji-list))))
+          (list newcand (cadr cand-label-ann) ann)))
+      (else
+        cand-label-ann))))
 
 (define (bushuconv-set-candidate-index-handler pc idx)
   (let ((tc (bushuconv-context-tc pc)))
