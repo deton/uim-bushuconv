@@ -387,6 +387,45 @@
     (tutcode-reset-handler tc)
     (tutcode-update-preedit tc))) ; 次のIMに切替えた時preeditが残らないように
 
+;;; 指定された漢字がどの集合に含まれるかを判定する
+;;; @param str 漢字1文字
+;;; @return '(jisx0208 jisx0213-1 jisx0213-2 jisx0212
+;;;          ksc5601 gb2312 unicode ascii)のいずれか
+(define (bushuconv-detect-kanjiset str)
+  ;; XXX: ISO-2022-JP-3-strict な変換を期待
+  (let* ((jis3str (iconv-convert "ISO-2022-JP-3" "UTF-8" str))
+         (jis3strlen (string-length jis3str)))
+    (cond
+      ((> jis3strlen 4)
+        (let ((escseq (substring jis3str 0 4)))
+          (cond
+            ((string=? "\x1b;$(P" escseq)
+              'jisx0213-2)
+            ((string=? "\x1b;$(O" escseq)
+              'jisx0213-1)
+            ((string=? "\x1b;$(Q" escseq)
+              'jisx0213-1) ; 'jisx0213:2004-1
+            ((string=? "\x1b;$B" (substring jis3str 0 3))
+              'jisx0208)
+            (else
+              'ascii))))
+      ((> jis3strlen 0)
+        'ascii)
+      (else
+        (let ((jisstr (iconv-convert "ISO-2022-JP-2" "UTF-8" str)))
+          (if (> (string-length jisstr) 4)
+            (let ((escseq (substring jisstr 0 4)))
+              (cond
+                ((string=? "\x1b;$(D" escseq)
+                  'jisx0212)
+                ((string=? "\x1b;$(C" escseq)
+                  'ksc5601)
+                ((string=? "\x1b;$A" (substring jisstr 0 3))
+                  'gb2312)
+                (else
+                  'unicode)))
+            'unicode))))))
+
 (define (bushuconv-get-candidate-handler pc idx accel-enum-hint)
   (let*
     ((tc (bushuconv-context-tc pc))
@@ -396,9 +435,12 @@
       ;; 対話的な部首合成変換の漢字候補表示
       ((eq? (tutcode-context-candidate-window tc)
         'tutcode-candidate-window-interactive-bushu)
-        (let* ((ucs (bushuconv-utf8-string->ichar cand))
-               (ucsstr (if (number? ucs) (format "U+~X" ucs) "")))
-          (append (take cand-label-ann 2) (list ucsstr))))
+        (let*
+          ((ucs (bushuconv-utf8-string->ichar cand))
+           (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
+           (kanjiset (symbol->string (bushuconv-detect-kanjiset cand)))
+           (ann (string-append ucsstr " (" kanjiset ")")))
+          (append (take cand-label-ann 2) (list ann))))
       ;; 仮想鍵盤
       ((and
         (eq? (tutcode-context-candidate-window tc)
@@ -424,6 +466,9 @@
                   (else #f)))
               (else altcands)))
            (newcand (or altcand (car cand-label-ann)))
+           (ucs (bushuconv-utf8-string->ichar cand))
+           (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
+           (kanjiset (symbol->string (bushuconv-detect-kanjiset cand)))
            (ann
             (apply string-append
               (append
@@ -431,6 +476,7 @@
                   (list (cadr spann-altcand))
                   '(""))
                 '("\n")
+                (list ucsstr " (" kanjiset ")\n")
                 kanji-list))))
           (list newcand (cadr cand-label-ann) ann)))
       (else
