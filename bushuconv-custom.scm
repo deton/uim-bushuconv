@@ -24,6 +24,12 @@
   (N_ "bushu.help file (UTF-8)")
   (N_ "long description will be here."))
 
+(define-custom 'bushuconv-use-only-index2-for-one-bushu #f
+               '(bushuconv)
+               '(boolean)
+               (N_ "Use only index2 file for one bushu for performance")
+               (N_ "long description will be here."))
+
 (define-custom 'bushuconv-switch-default-im-after-commit #f
                '(bushuconv)
                '(boolean)

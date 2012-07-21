@@ -90,7 +90,8 @@
     (string-to-list)
     (tutcode-euc-jp-string->ichar)
     (tutcode-do-update-preedit)
-    (tutcode-bushu-compose-explicitly)))
+    (tutcode-bushu-compose-explicitly)
+    (tutcode-bushu-compose-interactively)))
 
 (define (bushuconv-saved-value varsym)
   (cdr (assq varsym bushuconv-save-vars)))
@@ -169,6 +170,12 @@
               (tutcode-get-prediction-string pc
                 (tutcode-context-prediction-index pc))))))))) ; 熟語ガイド無し
 
+(define (bushuconv-bushu-lookup-index2 char-list)
+  (if (null? (cdr char-list)) ; 部首1つ?
+    (delete (car char-list)
+      (tutcode-bushu-lookup-index2-entry-internal (car char-list)))
+    '()))
+
 ;;; 部首1つの場合、その部首を含む漢字のリストをindex2から取得する。
 ;;; uim-tutcodeでは、部首を2つ以上入力することが前提のため、
 ;;; 部首1つの場合にindex2の漢字リストが候補に含まれないが、
@@ -178,12 +185,16 @@
 (define (bushuconv-bushu-compose-explicitly char-list)
   (let
     ((exp ((bushuconv-saved-value 'tutcode-bushu-compose-explicitly) char-list))
-     (index2
-      (if (null? (cdr char-list)) ; 部首1つ?
-        (delete (car char-list)
-          (tutcode-bushu-lookup-index2-entry-internal (car char-list)))
-        '())))
+     (index2 (bushuconv-bushu-lookup-index2 char-list)))
     (append exp index2)))
+
+;;; 遅いマシン用に、部首1つの時の漢字候補リストとして、
+;;; index2ファイルを検索して得られたものだけを使うようにする。
+;;; ただし、部首に含まれる部品は漢字候補に含まれなくなる。
+(define (bushuconv-bushu-compose-interactively char-list)
+  (tutcode-bushu-compose-tc23 char-list
+    (and bushuconv-use-only-index2-for-one-bushu
+         (pair? (bushuconv-bushu-lookup-index2 char-list)))))
 
 (define bushuconv-context-rec-spec
   (append
@@ -235,6 +246,8 @@
     (save-and-set! 'tutcode-do-update-preedit bushuconv-do-update-preedit)
     (save-and-set! 'tutcode-bushu-compose-explicitly
       bushuconv-bushu-compose-explicitly)
+    (save-and-set! 'tutcode-bushu-compose-interactively
+      bushuconv-bushu-compose-interactively)
     (if tutcode-use-dvorak?
       (begin
         (save-and-set! 'tutcode-rule
