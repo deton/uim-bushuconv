@@ -322,6 +322,13 @@
     (bushuconv-update-preedit pc)))
 
 (define (bushuconv-key-press-handler pc key key-state)
+  (define (commit-as-ucs pc tc str)
+    (let ((ucs (bushuconv-utf8-string->ichar str)))
+      (if (number? ucs)
+        (begin
+          (tutcode-commit tc (format "U+~X" ucs))
+          (tutcode-flush tc)
+          (bushuconv-check-post-commit pc tc)))))
   (define (change-help-index pc tc num)
     (let* ((nr-all (length (tutcode-context-stroke-help tc)))
            (idx (bushuconv-context-help-index pc))
@@ -364,6 +371,12 @@
              (key (string->ichar label)))
             (bushuconv-key-press-handler pc key 0))
           #t)
+        ((bushuconv-commit-as-ucs-key? key key-state)
+          (let*
+            ((idx (bushuconv-context-help-index pc))
+             (cand (car (list-ref (tutcode-context-stroke-help tc) idx))))
+            (commit-as-ucs pc tc cand))
+          #t)
         (else
           #f))))
   (if (ichar-control? key)
@@ -388,6 +401,11 @@
                 (tutcode-context-set-head! tc (list str)) ;合成後の漢字を部首に
                 (tutcode-begin-interactive-bushu-conversion tc)
                 (bushuconv-update-preedit pc)))))
+        ((and (bushuconv-commit-as-ucs-key? key key-state)
+              (> (tutcode-context-prediction-nr tc) 0)) ; has-candidate?
+          (let ((str (tutcode-get-prediction-string tc
+                      (tutcode-context-prediction-index tc))))
+            (commit-as-ucs pc tc str)))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))
