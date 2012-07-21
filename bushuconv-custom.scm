@@ -57,5 +57,5 @@
 (define-custom 'bushuconv-commit-as-ucs-key '("left")
                '(bushuconv)
 	       '(key)
-	       (N_ "[bushuconv] commit as unicode number (U+xxxx)")
+	       (N_ "[bushuconv] commit as unicode code point (U+xxxx)")
 	       (N_ "long description will be here"))
