@@ -10,6 +10,8 @@
 + bushu34h.revからJIS X 0212の行とコメント行を削除
   sed -e '6394,9451d' bushu34h.rev
 + Emacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
+  (JIS X 0212(ISO-2022-JP-2)とJIS X 0213(ISO-2022-JP-3)が混在するせいか、
+  nkfやiconvでの変換はうまくいかず。)
 + UTF-8でソートし直し(C-x h M-x sort-lines)。
 + bushu34.revとして保存。
 + mk-bdic34h+内のファイル名を、bushu34.{rev,expand,index2,help}にした
@@ -21,6 +23,8 @@
 
 ## bushu34h+
 + Emacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
+  (JIS X 0212(ISO-2022-JP-2)とJIS X 0213(ISO-2022-JP-3)が混在するせいか、
+  nkfやiconvでの変換はうまくいかず。)
 + bushu34h.revの13147行以降のコメントになっている予約文字をUTF-8文字化(ucs.sh)
 + UTF-8でソートし直し(C-x h M-x sort-lines)。
 + bushu34h+.revとして保存。
