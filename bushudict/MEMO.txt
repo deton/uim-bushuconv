@@ -1,0 +1,31 @@
+# tc-2.3.1-22.6のbushu.revやbushu34h.revからの辞書ファイル作成手順メモ
+## bushu12
++ bushu.revをEmacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
++ UTF-8でソートし直し(C-x h M-x sort-lines)。
++ bushu12.revとして保存。
++ mk-bdic34h+内のファイル名を、bushu12.{rev,expand,index2,help}にした
+  mk-bdic12を実行して、bushu12.{expand,index2}を作成。
+
+## bushu34
++ bushu34h.revからJIS X 0212の行とコメント行を削除
+  sed -e '6394,9451d' bushu34h.rev
++ Emacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
++ UTF-8でソートし直し(C-x h M-x sort-lines)。
++ bushu34.revとして保存。
++ mk-bdic34h+内のファイル名を、bushu34.{rev,expand,index2,help}にした
+  mk-bdic34を実行して、bushu34.{expand,index2}を作成。
++ 生成されたbushu34.{expand,index2}から{}を削除
+  (uim-tutcodeでは、{}による、漢字を部首として使う指定には未対応のため)
+  sed -e 's/[{}]//g'
++ ソートし直し(C-x h M-x sort-lines)。
+
+## bushu34h+
++ Emacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
++ bushu34h.revの13147行以降のコメントになっている予約文字をUTF-8文字化(ucs.sh)
++ UTF-8でソートし直し(C-x h M-x sort-lines)。
++ bushu34h+.revとして保存。
++ mk-bdic34h+を実行して、bushu34h+.{expand,index2}を作成。
++ 生成されたbushu34h+.{expand,index2}から{}を削除
+  (uim-tutcodeでは、{}による、漢字を部首として使う指定には未対応のため)
+  sed -e 's/[{}]//g'
++ ソートし直し(C-x h M-x sort-lines)。

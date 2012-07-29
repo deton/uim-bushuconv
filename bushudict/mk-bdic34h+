@@ -1,0 +1,22 @@
+; -*-emacs-lisp-*-
+(and (fboundp 'set-language-environment)
+     (set-language-environment "Japanese"))
+(setq load-path (cons "../lisp" load-path))
+(setq tcode-bushu-reverse-dictionary-name "bushu34h+.rev"
+      tcode-bushu-expand-file-name "bushu34h+.expand"
+      tcode-bushu-index2-file-name "bushu34h+.index2"
+      tcode-bushu-help-dictionary-name "bushu34h+.help")
+(let (tcode-init-file-name 
+      set-auto-coding-function)
+  (load "tc-pre-base")
+  (provide 'tc-pre)
+  (setq tcode-site-data-directory nil)
+  (load "tc-setup.el")
+  (setq tcode-data-directory ".")
+  (load "tc")
+  (message "making bushu dictionary...")
+  (let (tcode-verbose-message)
+    (tcode-bushu-init 999))
+  (tcode-save-dictionaries)
+  (message "making bushu dictionary...done"))
+(kill-emacs)
