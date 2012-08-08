@@ -274,6 +274,11 @@
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
+      (let ((sel (tutcode-selection-acquire-text-wo-nl tc)))
+        (if (pair? sel)
+          (begin
+            (tutcode-context-set-head! tc sel)
+            (tutcode-begin-interactive-bushu-conversion tc))))
       (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
       ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
       ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する

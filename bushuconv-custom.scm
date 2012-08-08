@@ -24,6 +24,12 @@
   (N_ "bushu.help file (UTF-8)")
   (N_ "long description will be here."))
 
+(define-custom 'bushuconv-on-selection #t
+               '(bushuconv)
+               '(boolean)
+               (N_ "bushu conversion on selection")
+               (N_ "long description will be here."))
+
 (define-custom 'bushuconv-use-only-index2-for-one-bushu #f
                '(bushuconv)
                '(boolean)
