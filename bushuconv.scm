@@ -492,12 +492,7 @@
         ;; annotation付与(「ア」をこざとへんとして扱っている等)と、
         ;; 代替候補文字列への置換("性"→"(性-生) (りっしんべん)")
         (let*
-          ((kanji-list
-            (if (or (eq? candidate-window-style 'table)
-                    tutcode-use-pseudo-table-style?)
-              '() ; 表形式候補ウィンドウはannotation表示未対応
-              (tutcode-bushu-lookup-index2-entry-internal cand)))
-           (spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
+          ((spann-altcand (assoc cand bushuconv-bushu-annotation-alist))
            (kakusu (safe-car (rk-context-seq (tutcode-context-rk-context tc))))
            (altcands (and spann-altcand (safe-car (cddr spann-altcand))))
            (altcand
@@ -508,18 +503,28 @@
                   (else #f)))
               (else altcands)))
            (newcand (or altcand (car cand-label-ann)))
-           (ucs (bushuconv-utf8-string->ichar cand))
-           (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
-           (kanjiset (symbol->string (bushuconv-detect-kanjiset cand)))
+           (make-annotation
+            (lambda (cand spann-altcand)
+              (let*
+                ((kanji-list (tutcode-bushu-lookup-index2-entry-internal cand))
+                 (ucs (bushuconv-utf8-string->ichar cand))
+                 (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
+                 (kanjiset (symbol->string (bushuconv-detect-kanjiset cand))))
+                (apply string-append
+                  (append
+                    (if spann-altcand
+                      (list (cadr spann-altcand))
+                      '(""))
+                    '("\n")
+                    (list ucsstr " (" kanjiset ")\n")
+                    kanji-list)))))
            (ann
-            (apply string-append
-              (append
-                (if spann-altcand
-                  (list (cadr spann-altcand))
-                  '(""))
-                '("\n")
-                (list ucsstr " (" kanjiset ")\n")
-                kanji-list))))
+            (if (and enable-annotation?
+                     ;; 表形式候補ウィンドウはannotation表示未対応
+                     (not (or (eq? candidate-window-style 'table)
+                              tutcode-use-pseudo-table-style?)))
+              (make-annotation cand spann-altcand)
+              "")))
           (list newcand (cadr cand-label-ann) ann)))
       (else
         cand-label-ann))))
