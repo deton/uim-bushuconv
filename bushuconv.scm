@@ -201,7 +201,8 @@
     context-rec-spec
     (list
       (list 'tc #f)
-      (list 'help-index 0))))
+      (list 'help-index 0)
+      (list 'selection #f))))
 
 (define-record 'bushuconv-context bushuconv-context-rec-spec)
 (define bushuconv-context-new-internal bushuconv-context-new)
@@ -277,6 +278,7 @@
       (let ((sel (tutcode-selection-acquire-text-wo-nl tc)))
         (if (pair? sel)
           (begin
+            (bushuconv-context-set-selection! pc sel)
             (tutcode-context-set-head! tc sel)
             (tutcode-begin-interactive-bushu-conversion tc))))
       (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
@@ -291,6 +293,12 @@
 (define (bushuconv-release-handler pc)
   (define (restore-var! varsym)
     (set-symbol-value! varsym (cdr (assq varsym bushuconv-save-vars))))
+  (let ((sel (bushuconv-context-selection pc)))
+    ;; 何も確定せずに戻る場合は、selection文字列を書き戻す。
+    ;; Firefoxやqt4の場合、preedit表示時にselectionが上書きされ、
+    ;; cancelしても消えたままになるので。
+    (if (pair? sel)
+      (tutcode-commit (bushuconv-context-tc pc) (string-list-concat sel))))
   (im-deactivate-candidate-selector pc)
   (tutcode-release-handler (bushuconv-context-tc pc))
   (for-each restore-var!
@@ -318,12 +326,14 @@
 ;;; 漢字が確定された場合、再度対話的な部首合成変換モードに入る
 (define (bushuconv-check-post-commit pc tc)
   (if (not (eq? (tutcode-context-state tc) 'tutcode-state-interactive-bushu))
-    (if bushuconv-switch-default-im-after-commit
-      (im-switch-im pc default-im-name)
-      (begin
-        (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
-        (tutcode-context-set-prediction-nr! tc 0)
-        (bushuconv-update-preedit pc)))
+    (begin
+      (bushuconv-context-set-selection! pc #f)
+      (if bushuconv-switch-default-im-after-commit
+        (im-switch-im pc default-im-name)
+        (begin
+          (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
+          (tutcode-context-set-prediction-nr! tc 0)
+          (bushuconv-update-preedit pc))))
     (bushuconv-update-preedit pc)))
 
 (define (bushuconv-key-press-handler pc key key-state)
