@@ -16,12 +16,14 @@
           (lambda (str)
             (display
               (apply string-append
-                (cdr
-                  (append-map
-                    (lambda (kanji)
-                      (list " "
-                        (symbol->string (bushuconv-detect-kanjiset kanji))))
-                    (reverse (bushuconv-string-to-list str))))))
+                (or
+                  (safe-cdr
+                    (append-map
+                      (lambda (kanji)
+                        (list " "
+                          (symbol->string (bushuconv-detect-kanjiset kanji))))
+                      (reverse (bushuconv-string-to-list str))))
+                  '())))
             (newline)))
         (rest (cdr args)))
     (if (pair? rest)
