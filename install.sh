@@ -10,7 +10,6 @@ if [ ! -d "$datadir" ]; then
 fi
 cp "$srcdir/bushudict/bushu34.index2" "$srcdir/bushudict/bushu34.expand" "$datadir"
 cp "$srcdir/bushudict/bushu34h+.index2" "$srcdir/bushudict/bushu34h+.expand" "$datadir"
-cp "$srcdir/bushudict/bushu12.index2" "$srcdir/bushudict/bushu12.expand" "$datadir"
 cp "$srcdir/pixmaps/$module.png" "$srcdir/pixmaps/${module}_dark_background.png" "$pixmapsdir"
 cp "$srcdir/pixmaps/$module.svg" "$srcdir/pixmaps/${module}_dark_background.svg" "$pixmapsdir"
 uim-module-manager --register "$module"

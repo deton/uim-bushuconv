@@ -10,13 +10,12 @@
 (define-custom 'bushuconv-kanjiset 'bushu34
   '(bushuconv)
   (list 'choice
-    (list 'bushu12 (N_ "JIS X 0208") (N_ "JIS Kanji level 1 and 2"))
     (list 'bushu34 (N_ "JIS X 0213")
       (N_ "JIS Kanji level 3 and 4 (includes level 1 and 2)"))
     (list 'bushu34h+ (N_ "JIS X 0213 and 0212")
-      (N_ "JIS Kanji level 3 and 4 and Hojo Kanji (NOT WORKS on uim-1.8.1)")))
+      (N_ "JIS Kanji level 3 and 4 and Hojo Kanji (NOT WORKS on uim-1.8.2)")))
   (N_ "Kanji set")
-  (N_ "Kanji set. 'JIS X 0213 and 0212' does not work on uim-1.8.1."))
+  (N_ "Kanji set. 'JIS X 0213 and 0212' does not work on uim-1.8.2."))
 
 (define-custom 'bushuconv-bushu-help-filename ""
   '(bushuconv)

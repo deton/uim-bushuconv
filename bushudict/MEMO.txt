@@ -1,11 +1,4 @@
-# tc-2.3.1-22.6のbushu.revやbushu34h.revからの辞書ファイル作成手順メモ
-## bushu12
-+ bushu.revをEmacsで開いてUTF-8で保存(C-x RET fでutf-8を指定して保存)。
-+ UTF-8でソートし直し(C-x h M-x sort-lines)。
-+ bushu12.revとして保存。
-+ mk-bdic34h+内のファイル名を、bushu12.{rev,expand,index2,help}にした
-  mk-bdic12を実行して、bushu12.{expand,index2}を作成。
-
+# tc-2.3.1-22.6のbushu34h.revからの辞書ファイル作成手順メモ
 ## bushu34
 + bushu34h.revからJIS X 0212の行とコメント行を削除
   sed -e '6394,9451d' bushu34h.rev

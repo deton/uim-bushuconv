@@ -32,10 +32,7 @@
 (require-extension (srfi 1))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
-
-(if (eq? bushuconv-kanjiset 'bushu12)
-  (require "bushuconv-rule12.scm")
-  (require "bushuconv-rule34.scm"))
+(require "bushuconv-rule.scm")
 
 ;;; XXX: bushu34h+.index2は長い行があるためUTF-8が途中で切れてエラーになる。
 ;;; /usr/local/share/uim/bushuconv-data/bushu34h+.{index2,expand}
