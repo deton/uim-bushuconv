@@ -436,19 +436,19 @@
 ;;; @return '(jisx0208 jisx0213-1 jisx0213-2 jisx0212
 ;;;          ksc5601 gb2312 unicode ascii)のいずれか
 (define (bushuconv-detect-kanjiset str)
-  ;; uimのtrunkのutil.scmに追加された関数。1.8ブランチには入ってないので
-  (define (iconv-convert to-code from-code from-str)
-    (if (equal? to-code from-code)
-        from-str
-        (or
-         (and-let* ((ic (iconv-open to-code from-code))
-                    (to-str (iconv-code-conv ic from-str)))
-           (iconv-release ic)
-           to-str)
-         ;; XXX
-         from-str)))
+  ;; uimのtrunkのutil.scmに追加された関数をベースに、
+  ;; 呼び出し元でiconv-open失敗#fがわかるようにしたもの
+  (define (bushuconv-iconv-convert to-code from-code from-str)
+    (and-let* ((ic (iconv-open to-code from-code))
+               (to-str (iconv-code-conv ic from-str)))
+      (iconv-release ic)
+      to-str))
   ;; XXX: ISO-2022-JP-3-strict な変換を期待
-  (let* ((jis3str (iconv-convert "ISO-2022-JP-3" "UTF-8" str))
+  ;; ISO-2022-JP-2004はglibcのiconvには無いが、
+  ;; ISO-2022-JP-3で\x1b;$(Qも対応している模様
+  (let* ((jis3str (or (bushuconv-iconv-convert "ISO-2022-JP-2004" "UTF-8" str)
+                      (bushuconv-iconv-convert "ISO-2022-JP-3" "UTF-8" str)
+                      ""))
          (jis3strlen (string-length jis3str)))
     (cond
       ((> jis3strlen 4)
@@ -467,7 +467,8 @@
       ((> jis3strlen 0)
         'ascii)
       (else
-        (let ((jisstr (iconv-convert "ISO-2022-JP-2" "UTF-8" str)))
+        (let ((jisstr (or (bushuconv-iconv-convert "ISO-2022-JP-2" "UTF-8" str)
+                          "")))
           (if (> (string-length jisstr) 4)
             (let ((escseq (substring jisstr 0 4)))
               (cond
