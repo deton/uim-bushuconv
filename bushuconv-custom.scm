@@ -35,7 +35,7 @@
                (N_ "Use only index2 file for one bushu for performance")
                (N_ "long description will be here."))
 
-(define-custom 'bushuconv-switch-default-im-after-commit #f
+(define-custom 'bushuconv-switch-default-im-after-commit #t
                '(bushuconv)
                '(boolean)
                (N_ "switch to default IM after commit")
