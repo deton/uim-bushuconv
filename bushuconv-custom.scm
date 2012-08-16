@@ -29,6 +29,12 @@
                (N_ "bushu conversion on selection on startup")
                (N_ "long description will be here."))
 
+(define-custom 'bushuconv-describe-char #t
+               '(bushuconv)
+               '(boolean)
+               (N_ "describe char for former kanji on startup")
+               (N_ "long description will be here."))
+
 (define-custom 'bushuconv-use-only-index2-for-one-bushu #f
                '(bushuconv)
                '(boolean)
