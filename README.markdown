@@ -4,8 +4,7 @@ uim-bushuconv
 uim-bushuconvは、部首合成変換を行うための
 [uim](http://code.google.com/p/uim/)用IMです。
 
-[uim-tutcodeの対話的な部首合成変換機能](http://code.google.com/p/uim-doc-ja/wiki/UimTutcode#%E5%AF%BE%E8%A9%B1%E7%9A%84%E3%81%AA%E9%83%A8%E9%A6%96%E5%90%88%E6%88%90%E5%A4%89%E6%8F%9B)
-を使っています。
+uim-tutcodeの対話的な部首合成変換機能を使っています。
 
 特徴
 ----
@@ -319,7 +318,8 @@ BUGS
   (例:「微王」に対し候補数41:「徴懲澂尫珖皝玫徨尩玩玵珧瑞菫玲珩珮琛...」)。
 
 * 漢字辞典の部首とは異なる場合があります。
-  uim-bushuconvで使用している、uim-tutcodeの対話的な部首合成変換機能は、
+  uim-bushuconvで使用している、
+  [uim-tutcodeの対話的な部首合成変換機能](http://code.google.com/p/uim-doc-ja/wiki/UimTutcode#%E5%AF%BE%E8%A9%B1%E7%9A%84%E3%81%AA%E9%83%A8%E9%A6%96%E5%90%88%E6%88%90%E5%A4%89%E6%8F%9B)は、
   もともとEmacs用の漢字直接入力環境tc2で作られたものです。
   つまり、漢字直接入力方式のT-Code等で直接入力可能な漢字を部品として使って
   漢字を合成することを意図したものなので、
