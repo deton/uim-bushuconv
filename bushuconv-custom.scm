@@ -62,11 +62,17 @@
 (define-custom 'bushuconv-kanji-as-bushu-key '("right")
                '(bushuconv)
 	       '(key)
-	       (N_ "[bushuconv] use kanji as bushu")
+	       (N_ "[bushuconv] use selected kanji as bushu")
 	       (N_ "long description will be here"))
 
 (define-custom 'bushuconv-commit-as-ucs-key '("left")
                '(bushuconv)
 	       '(key)
 	       (N_ "[bushuconv] commit as unicode code point (U+xxxx)")
+	       (N_ "long description will be here"))
+
+(define-custom 'bushuconv-acquire-former-char-key '("<IgnoreCase><Control>r")
+               '(bushuconv)
+	       '(key)
+	       (N_ "[bushuconv] acquire former char as bushu")
 	       (N_ "long description will be here"))

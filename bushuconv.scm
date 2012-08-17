@@ -199,7 +199,8 @@
     (list
       (list 'tc #f)
       (list 'help-index 0)
-      (list 'selection #f))))
+      (list 'selection #f)
+      (list 'acquire-count 0))))
 
 (define-record 'bushuconv-context bushuconv-context-rec-spec)
 (define bushuconv-context-new-internal bushuconv-context-new)
@@ -326,6 +327,7 @@
   (if (not (eq? (tutcode-context-state tc) 'tutcode-state-interactive-bushu))
     (begin
       (bushuconv-context-set-selection! pc #f)
+      (bushuconv-context-set-acquire-count! pc 0)
       (if bushuconv-switch-default-im-after-commit
         (im-switch-im pc default-im-name)
         (begin
@@ -419,6 +421,17 @@
           (let ((str (tutcode-get-prediction-string tc
                       (tutcode-context-prediction-index tc))))
             (commit-as-ucs pc tc str)))
+        ((bushuconv-acquire-former-char-key? key key-state)
+          (let* ((cnt (+ 1 (bushuconv-context-acquire-count pc)))
+                 (former-seq (tutcode-postfix-acquire-text tc cnt)))
+            (if (<= cnt (length former-seq))
+              (begin
+                (bushuconv-context-set-acquire-count! pc cnt)
+                (tutcode-context-set-head! tc
+                  (cons (last former-seq) (tutcode-context-head tc)))
+                (tutcode-begin-interactive-bushu-conversion tc)
+                (bushuconv-update-preedit pc))
+              (bushuconv-context-set-acquire-count! pc 0))))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))
