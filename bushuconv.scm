@@ -31,6 +31,7 @@
 
 (require-extension (srfi 1 2 8))
 (require "tutcode.scm")
+(require-dynlib "look")
 (require-custom "bushuconv-custom.scm")
 (require "bushuconv-rule.scm")
 
@@ -42,6 +43,8 @@
 (define bushuconv-bushu-expand-filename
   (string-append (sys-pkgdatadir) "/bushuconv-data/"
     (symbol->string bushuconv-kanjiset) ".expand"))
+(define bushuconv-annotation-filename
+  (string-append (sys-pkgdatadir) "/bushuconv-data/annotation"))
 
 ;; XXX: stroke-help candwinクリックすると
 ;; gtk2/immodule/uim-cand-win-vertical-gtkがSEGVする。delay版で回避
@@ -579,26 +582,39 @@
                   'unicode)))
             'unicode))))))
 
+(define (bushuconv-annotation-lookup ucsstr)
+  (and-let*
+    ((looked (look-lib-look #f #f 1 bushuconv-annotation-filename ucsstr))
+     (line (and (pair? looked) (car looked)))
+     (code-kun-on-def (string-split line "\t")))
+    (cdr code-kun-on-def)))
+
+(define (bushuconv-annotation-make cand ann kanji-list)
+  (if (and enable-annotation?
+           ;; 表形式候補ウィンドウはannotation表示未対応
+           (not (or (eq? candidate-window-style 'table)
+                    tutcode-use-pseudo-table-style?)))
+    (let*
+      ((ucs (bushuconv-utf8-string->ichar cand))
+       (ucsstr (and (number? ucs) (number->string ucs 16)))
+       (kanjiset
+        (symbol->string (bushuconv-detect-kanjiset cand)))
+       (kun-on-def (and ucsstr (bushuconv-annotation-lookup ucsstr))))
+      (apply string-append
+        (append
+          (list ann "\n")
+          (if ucsstr
+            (list "U+" ucsstr)
+            '())
+          (list " (" kanjiset ")\n")
+          (if kun-on-def
+            (cdr (append-map (lambda (x) (list " " x)) kun-on-def))
+            '())
+          '("\n")
+          kanji-list)))
+    ""))
+
 (define (bushuconv-get-candidate-handler pc idx accel-enum-hint)
-  (define (make-annotation cand spann-altcand kanji-list)
-    (if (and enable-annotation?
-             ;; 表形式候補ウィンドウはannotation表示未対応
-             (not (or (eq? candidate-window-style 'table)
-                      tutcode-use-pseudo-table-style?)))
-      (let*
-        ((ucs (bushuconv-utf8-string->ichar cand))
-         (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
-         (kanjiset
-          (symbol->string (bushuconv-detect-kanjiset cand))))
-        (apply string-append
-          (append
-            (if spann-altcand
-              (list (cadr spann-altcand))
-              '(""))
-            '("\n")
-            (list ucsstr " (" kanjiset ")\n")
-            kanji-list)))
-      ""))
   (let*
     ((tc (bushuconv-context-tc pc))
      (cand-label-ann (tutcode-get-candidate-handler tc idx accel-enum-hint))
@@ -607,11 +623,7 @@
       ;; 対話的な部首合成変換の漢字候補表示
       ((eq? (tutcode-context-candidate-window tc)
         'tutcode-candidate-window-interactive-bushu)
-        (let*
-          ((ucs (bushuconv-utf8-string->ichar cand))
-           (ucsstr (if (number? ucs) (format "U+~X" ucs) ""))
-           (kanjiset (symbol->string (bushuconv-detect-kanjiset cand)))
-           (ann (string-append ucsstr " (" kanjiset ")")))
+        (let ((ann (bushuconv-annotation-make cand "" '())))
           (append (take cand-label-ann 2) (list ann))))
       ;; 仮想鍵盤
       ((eq? (tutcode-context-candidate-window tc)
@@ -633,14 +645,17 @@
                       (else #f)))
                   (else altcands)))
                (newcand (or altcand (car cand-label-ann)))
-               (ann (make-annotation cand spann-altcand
+               (ann (bushuconv-annotation-make cand
+                      (if spann-altcand
+                        (cadr spann-altcand)
+                        "")
                       (tutcode-bushu-lookup-index2-entry-internal cand))))
               (list newcand (cadr cand-label-ann) ann)))
           ((and bushuconv-describe-char (string=? cand "*1画"))
             (let ((former-seq (tutcode-postfix-acquire-text tc 1)))
               (if (pair? former-seq)
-                (let ((ann (make-annotation
-                            (car former-seq) (list #f (car former-seq)) '())))
+                (let ((ann (bushuconv-annotation-make
+                            (car former-seq) (car former-seq) '())))
                   (list cand (cadr cand-label-ann) ann))
                 cand-label-ann)))
           (else
