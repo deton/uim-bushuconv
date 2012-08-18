@@ -15,11 +15,12 @@
 (require-extension (srfi 1))
 (require "rk.scm")
 (require "japanese.scm")
+(require "skk.scm")
 
 (define uimsh-rk-option-table
   '((("-k" "--katakana") . katakana)))
 
-(define (rk rseq)
+(define (rk rseq hira-kata)
   (let* ((rkc (rk-context-new ja-rk-rule #t #f))
          (kanalist0
           (filter pair?
@@ -34,24 +35,20 @@
             kanalist0)))
     ;; ¥ê¥¹¥È¤Î¥ê¥¹¥È¤Ë¤Ê¤Ã¤Æ¤ë¤â¤Î¤ÏÅ¸³«¤¹¤ë¡£
     ;; Îã: "kyaku" -> ((("¤­" "¥­" "7") ("¤ã" "¥ã" ",")) ("¤¯" "¥¯" "8"))
-    ;; -> (("¤­" "¥­" "7") ("¤ã" "¥ã" ",") ("¤¯" "¥¯" "8"))
-    (fold-right
-      (lambda (x res)
-        (if (pair? (car x))
-          (append x res)
-          (cons x res)))
-      '()
-      kanalist)))
+    ;; -> "¤­¤ã¤¯"
+    (apply string-append
+      (map
+        (lambda (x)
+          (skk-get-string '() x hira-kata))
+        kanalist))))
 
 (define (main args)
   (let ((cmd-action ; ³Æ¹Ô¤´¤È¤Ë¼Â¹Ô¤¹¤ë´Ø¿ô
           (lambda (str)
-            (let*
-              ((kanalist (rk (reverse (string-to-list str))))
-               (kanastr (ja-make-kana-str (reverse kanalist)
-                          (if uimsh-rk-opt-katakana
-                            ja-type-katakana
-                            ja-type-hiragana))))
+            (let ((kanastr (rk (reverse (string-to-list str))
+                            (if uimsh-rk-opt-katakana
+                              ja-type-katakana
+                              ja-type-hiragana))))
               (display kanastr)
               (newline))))
         (str-args
