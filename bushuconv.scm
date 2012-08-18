@@ -584,10 +584,10 @@
 
 (define (bushuconv-annotation-lookup ucsstr)
   (and-let*
-    ((looked (look-lib-look #f #f 1 bushuconv-annotation-filename ucsstr))
+    ((key (string-append ucsstr "\t"))
+     (looked (look-lib-look #f #f 1 bushuconv-annotation-filename key))
      (line (and (pair? looked) (car looked)))
-     (code-kun-on-def (string-split line "\t")))
-    (cdr code-kun-on-def)))
+    line)))
 
 (define (bushuconv-annotation-make cand ann kanji-list)
   (if (and enable-annotation?
@@ -606,11 +606,8 @@
           (if ucsstr
             (list "U+" ucsstr)
             '())
-          (list " (" kanjiset ")\n")
-          (if kun-on-def
-            (cdr (append-map (lambda (x) (list " " x)) kun-on-def))
-            '())
-          '("\n")
+          (list " (" kanjiset ") ")
+          (list (or kun-on-def "") "\n")
           kanji-list)))
     ""))
 
