@@ -200,7 +200,7 @@
       (list 'tc #f)
       (list 'help-index 0)
       (list 'selection #f)
-      (list 'acquire-count 0))))
+      (list 'acquire-pos 0))))
 
 (define-record 'bushuconv-context bushuconv-context-rec-spec)
 (define bushuconv-context-new-internal bushuconv-context-new)
@@ -327,7 +327,7 @@
   (if (not (eq? (tutcode-context-state tc) 'tutcode-state-interactive-bushu))
     (begin
       (bushuconv-context-set-selection! pc #f)
-      (bushuconv-context-set-acquire-count! pc 0)
+      (bushuconv-context-set-acquire-pos! pc 0)
       (if bushuconv-switch-default-im-after-commit
         (im-switch-im pc default-im-name)
         (begin
@@ -375,6 +375,41 @@
       (else
         (seqloop (append! result (list (car seq))) (cdr seq)))))
   (seqloop '() seq))
+
+(define (bushuconv-acquire-char pc former?)
+  (and-let*
+    ((pos (bushuconv-context-acquire-pos pc))
+     (f-l-n ; former-len latter-len next-pos
+      (cond
+        ((= pos 0)
+          (if former?
+            (list 1 0 1)
+            (list 0 1 -1)))
+        ((> pos 0)
+          (if former?
+            (list (+ pos 1) 0 (+ pos 1))
+            (list pos 0 (- pos 1))))
+        (else
+          (if former?
+            (list 0 (- 0 pos) (+ pos 1))
+            (list 0 (- 0 pos -1) (- pos 1))))))
+     (former-len (car f-l-n))
+     (latter-len (cadr f-l-n))
+     (ustr (im-acquire-text pc 'primary 'cursor former-len latter-len))
+     (seq
+      (if (> former-len 0)
+        (ustr-former-seq ustr)
+        (ustr-latter-seq ustr)))
+     (strlist (and (pair? seq) (bushuconv-string-to-list (car seq)))))
+   (if (> former-len 0)
+    (and (= former-len (length strlist))
+      (begin
+        (bushuconv-context-set-acquire-pos! pc (caddr f-l-n))
+        (last strlist)))
+    (and (= latter-len (length strlist))
+      (begin
+        (bushuconv-context-set-acquire-pos! pc (caddr f-l-n))
+        (car strlist))))))
 
 (define (bushuconv-key-press-handler pc key key-state)
   (define (change-help-index pc tc num)
@@ -470,16 +505,17 @@
                 (tutcode-begin-interactive-bushu-conversion tc)
                 (bushuconv-update-preedit pc)))))
         ((bushuconv-acquire-former-char-key? key key-state)
-          (let* ((cnt (+ 1 (bushuconv-context-acquire-count pc)))
-                 (former-seq (tutcode-postfix-acquire-text tc cnt)))
-            (if (<= cnt (length former-seq))
-              (begin
-                (bushuconv-context-set-acquire-count! pc cnt)
-                (tutcode-context-set-head! tc (cons (last former-seq) head))
-                (tutcode-begin-interactive-bushu-conversion tc)
-                (bushuconv-update-preedit pc)))))
+          (and-let* ((char (bushuconv-acquire-char pc #t)))
+            (tutcode-context-set-head! tc (cons char head))
+            (tutcode-begin-interactive-bushu-conversion tc)
+            (bushuconv-update-preedit pc)))
+        ((bushuconv-acquire-latter-char-key? key key-state)
+          (and-let* ((char (bushuconv-acquire-char pc #f)))
+            (tutcode-context-set-head! tc (cons char head))
+            (tutcode-begin-interactive-bushu-conversion tc)
+            (bushuconv-update-preedit pc)))
         ((bushuconv-acquire-former-char-reset-key? key key-state)
-          (bushuconv-context-set-acquire-count! pc 0))
+          (bushuconv-context-set-acquire-pos! pc 0))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))
