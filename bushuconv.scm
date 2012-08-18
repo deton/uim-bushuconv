@@ -29,7 +29,7 @@
 ;;; SUCH DAMAGE.
 ;;;;
 
-(require-extension (srfi 1))
+(require-extension (srfi 1 2 8))
 (require "tutcode.scm")
 (require-custom "bushuconv-custom.scm")
 (require "bushuconv-rule.scm")
@@ -336,6 +336,44 @@
           (bushuconv-update-preedit pc))))
     (bushuconv-update-preedit pc)))
 
+(define (bushuconv-ichar-hexa-numeric? c)
+  (or (ichar-numeric? c)
+      (and (integer? c)
+           (or (<= 65 c 70) (<= 97 c 102)))))
+
+(define (bushuconv-ucsseq->utf8-string ucsseq)
+  (and-let*
+    ((ucs (string->number (apply string-append ucsseq) 16))
+     ;; range check to avoid error
+     (valid? ; sigscheme/src/sigschemeinternal.h:ICHAR_VALID_UNICODEP()
+      (or
+        (<= 0 ucs #xd7ff)
+        (<= #xe000 ucs #x10ffff)))
+     (utf8-str (ucs->utf8-string ucs)))))
+ 
+;;; U+XXXXXがあったら対応する文字に置換
+(define (bushuconv-translate-ucs seq)
+  (define (hexloop seq)
+    (receive
+      (hexseq rest)
+      (span
+        (lambda (x)
+          (bushuconv-ichar-hexa-numeric? (bushuconv-utf8-string->ichar x)))
+        seq)
+      (let ((utf8str (bushuconv-ucsseq->utf8-string hexseq)))
+        (if utf8str
+          (cons utf8str (seqloop rest))
+          (append '("U" "+") hexseq (seqloop rest))))))
+  (define (seqloop seq)
+    (cond
+      ((> 3 (length seq))
+        seq)
+      ((equal? '("U" "+") (take seq 2))
+        (hexloop (cddr seq)))
+      (else
+        (cons (car seq) (seqloop (cdr seq))))))
+  (seqloop seq))
+
 (define (bushuconv-key-press-handler pc key key-state)
   (define (commit-as-ucs pc tc str)
     (let ((ucs (bushuconv-utf8-string->ichar str)))
@@ -396,15 +434,16 @@
           #f))))
   (if (ichar-control? key)
     (im-commit-raw pc)
-    (let ((tc (bushuconv-context-tc pc)))
+    (let* ((tc (bushuconv-context-tc pc))
+           (head (tutcode-context-head tc)))
       (cond
         ((stroke-help-selection-keys? pc tc key key-state)
           )
         ((bushuconv-switch-default-im-key? key key-state)
           (im-switch-im pc default-im-name))
         ((and (bushuconv-commit-bushu-key? key key-state)
-              (pair? (tutcode-context-head tc)))
-          (tutcode-commit tc (string-list-concat (tutcode-context-head tc)))
+              (pair? head))
+          (tutcode-commit tc (string-list-concat head))
           (tutcode-flush tc)
           (bushuconv-check-post-commit pc tc))
         ((and (bushuconv-kanji-as-bushu-key? key key-state)
@@ -421,14 +460,25 @@
           (let ((str (tutcode-get-prediction-string tc
                       (tutcode-context-prediction-index tc))))
             (commit-as-ucs pc tc str)))
+        ((tutcode-paste-key? key key-state)
+          (let ((latter-seq (tutcode-clipboard-acquire-text-wo-nl tc 'full)))
+            (if (pair? latter-seq)
+              ;; U+XXXXXがあったら対応する文字として貼り付け。
+              ;; XXX: 貼り付けた文字を含めると部首合成後の漢字候補が無くなる
+              ;; 場合は貼り付けた文字を削除するので、
+              ;; 任意の文字が入力できるわけではない。
+              (let ((seq
+                      (reverse (bushuconv-translate-ucs (reverse latter-seq)))))
+                (tutcode-context-set-head! tc (append seq head))
+                (tutcode-begin-interactive-bushu-conversion tc)
+                (bushuconv-update-preedit pc)))))
         ((bushuconv-acquire-former-char-key? key key-state)
           (let* ((cnt (+ 1 (bushuconv-context-acquire-count pc)))
                  (former-seq (tutcode-postfix-acquire-text tc cnt)))
             (if (<= cnt (length former-seq))
               (begin
                 (bushuconv-context-set-acquire-count! pc cnt)
-                (tutcode-context-set-head! tc
-                  (cons (last former-seq) (tutcode-context-head tc)))
+                (tutcode-context-set-head! tc (cons (last former-seq) head))
                 (tutcode-begin-interactive-bushu-conversion tc)
                 (bushuconv-update-preedit pc))
               (bushuconv-context-set-acquire-count! pc 0))))
