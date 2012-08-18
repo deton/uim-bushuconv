@@ -353,7 +353,7 @@
  
 ;;; U+XXXXXがあったら対応する文字に置換
 (define (bushuconv-translate-ucs seq)
-  (define (hexloop seq)
+  (define (hexloop result seq)
     (receive
       (hexseq rest)
       (span
@@ -361,18 +361,20 @@
           (bushuconv-ichar-hexa-numeric? (bushuconv-utf8-string->ichar x)))
         seq)
       (let ((utf8str (bushuconv-ucsseq->utf8-string hexseq)))
-        (if utf8str
-          (cons utf8str (seqloop rest))
-          (append '("U" "+") hexseq (seqloop rest))))))
-  (define (seqloop seq)
+        (seqloop
+          (if utf8str
+            (append! result (list utf8str))
+            (append! result '("U" "+") hexseq))
+          rest))))
+  (define (seqloop result seq)
     (cond
       ((> 3 (length seq))
-        seq)
+        (append! result seq))
       ((equal? '("U" "+") (take seq 2))
-        (hexloop (cddr seq)))
+        (hexloop result (cddr seq)))
       (else
-        (cons (car seq) (seqloop (cdr seq))))))
-  (seqloop seq))
+        (seqloop (append! result (list (car seq))) (cdr seq)))))
+  (seqloop '() seq))
 
 (define (bushuconv-key-press-handler pc key key-state)
   (define (commit-as-ucs pc tc str)
