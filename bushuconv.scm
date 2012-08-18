@@ -602,7 +602,9 @@
        (kun-on-def (and ucsstr (bushuconv-annotation-lookup ucsstr))))
       (apply string-append
         (append
-          (list ann "\n")
+          (if ann
+            (list ann "\n")
+            '())
           (if ucsstr
             (list "U+" ucsstr)
             '())
@@ -620,7 +622,7 @@
       ;; 対話的な部首合成変換の漢字候補表示
       ((eq? (tutcode-context-candidate-window tc)
         'tutcode-candidate-window-interactive-bushu)
-        (let ((ann (bushuconv-annotation-make cand "" '())))
+        (let ((ann (bushuconv-annotation-make cand #f '())))
           (append (take cand-label-ann 2) (list ann))))
       ;; 仮想鍵盤
       ((eq? (tutcode-context-candidate-window tc)
