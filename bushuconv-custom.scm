@@ -76,3 +76,9 @@
 	       '(key)
 	       (N_ "[bushuconv] acquire former char as bushu")
 	       (N_ "long description will be here"))
+
+(define-custom 'bushuconv-acquire-former-char-reset-key '("<IgnoreCase><Control>l")
+               '(bushuconv)
+	       '(key)
+	       (N_ "[bushuconv] reset position to acquire former char")
+	       (N_ "long description will be here"))

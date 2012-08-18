@@ -477,8 +477,9 @@
                 (bushuconv-context-set-acquire-count! pc cnt)
                 (tutcode-context-set-head! tc (cons (last former-seq) head))
                 (tutcode-begin-interactive-bushu-conversion tc)
-                (bushuconv-update-preedit pc))
-              (bushuconv-context-set-acquire-count! pc 0))))
+                (bushuconv-update-preedit pc)))))
+        ((bushuconv-acquire-former-char-reset-key? key key-state)
+          (bushuconv-context-set-acquire-count! pc 0))
         (else
           (tutcode-proc-state-interactive-bushu tc key key-state)
           (bushuconv-check-post-commit pc tc))))))
