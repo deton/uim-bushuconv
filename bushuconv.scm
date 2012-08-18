@@ -499,14 +499,22 @@
           (let ((latter-seq (tutcode-clipboard-acquire-text-wo-nl tc 'full)))
             (if (pair? latter-seq)
               ;; U+XXXXXがあったら対応する文字として貼り付け。
-              ;; XXX: 貼り付けた文字を含めると部首合成後の漢字候補が無くなる
-              ;; 場合は貼り付けた文字を削除するので、
-              ;; 任意の文字が入力できるわけではない。
               (let ((seq
-                      (reverse (bushuconv-translate-ucs (reverse latter-seq)))))
+                      (reverse (bushuconv-translate-ucs (reverse latter-seq))))
+                    (headlen (length head)))
                 (tutcode-context-set-head! tc (append seq head))
                 (tutcode-begin-interactive-bushu-conversion tc)
-                (bushuconv-update-preedit pc)))))
+                ;; 最初の部首としてU+XXXXXをpasteして、pasteした文字が削除
+                ;; された場合(pasteした文字を含めると部首合成後の漢字候補が
+                ;; 無くなる場合)、commitする(U+XXXXXで任意の文字を入力可能に)
+                (if (and (= 0 headlen (length (tutcode-context-head tc)))
+                         (< 2 (length latter-seq))
+                         (equal? '("+" "U") (take-right latter-seq 2)))
+                  (begin
+                    (tutcode-commit tc (string-list-concat seq))
+                    (tutcode-flush tc)
+                    (bushuconv-check-post-commit pc tc))
+                  (bushuconv-update-preedit pc))))))
         ((bushuconv-acquire-former-char-key? key key-state)
           (and-let* ((char (bushuconv-acquire-char pc #t)))
             (tutcode-context-set-head! tc (cons char head))
