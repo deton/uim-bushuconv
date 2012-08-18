@@ -1,15 +1,17 @@
 #! /usr/bin/env uim-sh
-;;; ãƒ­ãƒ¼ãƒå­—ã‹ãªå¤‰æ›ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ãƒ„ãƒ¼ãƒ«ã€‚
+;;; ¥í¡¼¥Ş»ú¤«¤ÊÊÑ´¹¥³¥Ş¥ó¥É¥é¥¤¥ó¥Ä¡¼¥ë¡£
 ;;;
-;;; ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã§æŒ‡å®šã•ã‚ŒãŸå„å¼•æ•°(ãƒ­ãƒ¼ãƒå­—)ã‚’ã‹ãªã«å¤‰æ›ã€‚
-;;; å¼•æ•°ãŒç„¡ã„å ´åˆã¯ã€æ¨™æº–å…¥åŠ›ã®å„è¡Œã”ã¨ã«å®Ÿè¡Œã€‚
-;;; å‡ºåŠ›æ¼¢å­—ã‚³ãƒ¼ãƒ‰ã¯EUC-JPã€‚
+;;; ¥³¥Ş¥ó¥É¥é¥¤¥ó¤Ç»ØÄê¤µ¤ì¤¿³Æ°ú¿ô(¥í¡¼¥Ş»ú)¤ò¤«¤Ê¤ËÊÑ´¹¡£
+;;; °ú¿ô¤¬Ìµ¤¤¾ì¹ç¤Ï¡¢É¸½àÆşÎÏ¤Î³Æ¹Ô¤´¤È¤Ë¼Â¹Ô¡£
+;;; ½ĞÎÏ´Á»ú¥³¡¼¥É¤ÏEUC-JP¡£
 ;;;
-;;; ã‚ªãƒ—ã‚·ãƒ§ãƒ³:
-;;;   -k, --katakana  ã‚«ã‚¿ã‚«ãƒŠã§å‡ºåŠ›ã™ã‚‹ã€‚
+;;; ¥ª¥×¥·¥ç¥ó:
+;;;   -k, --katakana  ¥«¥¿¥«¥Ê¤Ç½ĞÎÏ¤¹¤ë¡£
 ;;;
-;;; $ echo 'sakazuki' | $PWD/uimsh-rk.scm
-;;; ã•ã‹ãšã
+;;; $ $PWD/uimsh-rk.scm ittyoume
+;;; ¤¤¤Ã¤Á¤ç¤¦¤á
+;;; $ $PWD/uimsh-rk.scm -k shoppingu
+;;; ¥·¥ç¥Ã¥Ô¥ó¥°
 (require-extension (srfi 1))
 (require "rk.scm")
 (require "japanese.scm")
@@ -25,13 +27,24 @@
               (lambda (x)
                 (rk-push-key! rkc x))
               rseq)))
-         (residual-kana (rk-push-key-last! rkc)))
-    (if residual-kana
-      (append kanalist0 (list residual-kana))
-      kanalist0)))
+         (residual-kana (rk-push-key-last! rkc))
+         (kanalist
+          (if residual-kana
+            (append kanalist0 (list residual-kana))
+            kanalist0)))
+    ;; ¥ê¥¹¥È¤Î¥ê¥¹¥È¤Ë¤Ê¤Ã¤Æ¤ë¤â¤Î¤ÏÅ¸³«¤¹¤ë¡£
+    ;; Îã: "kyaku" -> ((("¤­" "¥­" "7") ("¤ã" "¥ã" ",")) ("¤¯" "¥¯" "8"))
+    ;; -> (("¤­" "¥­" "7") ("¤ã" "¥ã" ",") ("¤¯" "¥¯" "8"))
+    (fold-right
+      (lambda (x res)
+        (if (pair? (car x))
+          (append x res)
+          (cons x res)))
+      '()
+      kanalist)))
 
 (define (main args)
-  (let ((cmd-action ; å„è¡Œã”ã¨ã«å®Ÿè¡Œã™ã‚‹é–¢æ•°
+  (let ((cmd-action ; ³Æ¹Ô¤´¤È¤Ë¼Â¹Ô¤¹¤ë´Ø¿ô
           (lambda (str)
             (let*
               ((kanalist (rk (reverse (string-to-list str))))
