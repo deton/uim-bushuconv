@@ -7,21 +7,32 @@
 ;;;
 ;;; ¥ª¥×¥·¥ç¥ó:
 ;;;   -k, --katakana  ¥«¥¿¥«¥Ê¤Ç½ÐÎÏ¤¹¤ë¡£
+;;;   -n              "nna"¤ò"¤ó¤¢"¤Ç¤Ê¤¯"¤ó¤Ê"¤ËÊÑ´¹¤¹¤ë¡£
 ;;;
 ;;; $ $PWD/uimsh-rk.scm ittyoume
 ;;; ¤¤¤Ã¤Á¤ç¤¦¤á
 ;;; $ $PWD/uimsh-rk.scm -k shoppingu
 ;;; ¥·¥ç¥Ã¥Ô¥ó¥°
+;;; $ $PWD/uimsh-rk.scm shinnyuu
+;;; ¤·¤ó¤æ¤¦
+;;; $ $PWD/uimsh-rk.scm -n shinnyuu
+;;; ¤·¤ó¤Ë¤å¤¦
 (require-extension (srfi 1))
 (require "rk.scm")
 (require "japanese.scm")
 (require "skk.scm")
 
 (define uimsh-rk-option-table
-  '((("-k" "--katakana") . katakana)))
+  '((("-k" "--katakana") . katakana)
+    (("-n") . nn)))
 
 (define (rk rseq hira-kata)
-  (let* ((rkc (rk-context-new ja-rk-rule #t #f))
+  (let* ((rkc
+          (rk-context-new
+            (if uimsh-rk-opt-nn
+              (cons '((("n" "n"). ("n"))("¤ó" "¥ó" "Ž]")) ja-rk-rule)
+              ja-rk-rule)
+            #t #f))
          (kanalist0
           (filter pair?
             (map-in-order
