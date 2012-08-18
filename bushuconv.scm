@@ -584,7 +584,7 @@
 
 (define (bushuconv-annotation-lookup ucsstr)
   (and-let*
-    ((key (string-append ucsstr "\t"))
+    ((key (string-append ucsstr " "))
      (looked (look-lib-look #f #f 1 bushuconv-annotation-filename key))
      (line (and (pair? looked) (car looked)))
     line)))
