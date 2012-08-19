@@ -272,24 +272,31 @@
         (length tutcode-heading-label-char-list-for-prediction)
         tutcode-nr-candidate-max-for-prediction))
     (let ((pc (bushuconv-context-new id im))
-          (tc (tutcode-init-handler id im arg)))
+          (tc (tutcode-init-handler id im arg))
+          (releasing? #f))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       (if bushuconv-on-selection
         (let ((sel (tutcode-selection-acquire-text-wo-nl tc)))
           (if (pair? sel)
-            (begin
-              (bushuconv-context-set-selection! pc sel)
-              (tutcode-context-set-head! tc sel)
-              (tutcode-begin-interactive-bushu-conversion tc)))))
-      (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
-      ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
-      ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する
-      ;; (widgetの初期化が完了する前にdefault-activityが呼ばれるのが原因?)
-      (if (tutcode-candidate-window-enable-delay? tc
-            tutcode-candidate-window-activate-delay-for-stroke-help)
-        (bushuconv-context-set-widgets! pc bushuconv-widgets))
+            (set! releasing?
+              (and (not (bushuconv-paste pc tc sel))
+                   bushuconv-switch-default-im-after-commit)))))
+      ;; U+XXXXXを選択して、bushuconv IMに切り替えた際に、対応する文字が
+      ;; commitされて、かつbushuconv-switch-default-im-after-commitが#tの場合、
+      ;; default-imにim-switch-imするので、候補ウィンドウは表示しない。
+      ;; XXX: この場合、直後のキー入力がdefault-im側に渡らない。
+      (if (not releasing?)
+        (begin
+          ;; XXX:ここでstroke-help windowを表示しても中身空
+          (tutcode-update-preedit tc)
+          ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
+          ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する
+          ;; (widgetの初期化が完了する前にdefault-activityが呼ばれるのが原因?)
+          (if (tutcode-candidate-window-enable-delay? tc
+                tutcode-candidate-window-activate-delay-for-stroke-help)
+            (bushuconv-context-set-widgets! pc bushuconv-widgets))))
       pc)))
 
 (define (bushuconv-release-handler pc)
@@ -414,6 +421,29 @@
         (bushuconv-context-set-acquire-pos! pc (caddr f-l-n))
         (car strlist))))))
 
+(define (bushuconv-paste pc tc paste-seq)
+  ;; U+XXXXXがあったら対応する文字として貼り付け。
+  (let* ((seq
+          (reverse (bushuconv-translate-ucs (reverse paste-seq))))
+         (head (tutcode-context-head tc))
+         (headlen (length head)))
+    (tutcode-context-set-head! tc (append seq head))
+    (tutcode-begin-interactive-bushu-conversion tc)
+    ;; 最初の部首としてU+XXXXXをpasteして、pasteした文字が削除された場合
+    ;; (pasteした文字を含めると部首合成後の漢字候補が無くなる場合)、
+    ;; commitする(U+XXXXXで任意の文字を入力可能にするため)
+    (if (and (= 0 headlen (length (tutcode-context-head tc)))
+             (< 2 (length paste-seq))
+             (equal? '("+" "U") (take-right paste-seq 2)))
+      (begin
+        (tutcode-commit tc (string-list-concat seq))
+        (tutcode-flush tc)
+        (bushuconv-check-post-commit pc tc)
+        #f)
+      (begin
+        (bushuconv-update-preedit pc)
+        #t))))
+
 (define (bushuconv-key-press-handler pc key key-state)
   (define (change-help-index pc tc num)
     (let* ((nr-all (length (tutcode-context-stroke-help tc)))
@@ -498,23 +528,7 @@
         ((tutcode-paste-key? key key-state)
           (let ((latter-seq (tutcode-clipboard-acquire-text-wo-nl tc 'full)))
             (if (pair? latter-seq)
-              ;; U+XXXXXがあったら対応する文字として貼り付け。
-              (let ((seq
-                      (reverse (bushuconv-translate-ucs (reverse latter-seq))))
-                    (headlen (length head)))
-                (tutcode-context-set-head! tc (append seq head))
-                (tutcode-begin-interactive-bushu-conversion tc)
-                ;; 最初の部首としてU+XXXXXをpasteして、pasteした文字が削除
-                ;; された場合(pasteした文字を含めると部首合成後の漢字候補が
-                ;; 無くなる場合)、commitする(U+XXXXXで任意の文字を入力可能に)
-                (if (and (= 0 headlen (length (tutcode-context-head tc)))
-                         (< 2 (length latter-seq))
-                         (equal? '("+" "U") (take-right latter-seq 2)))
-                  (begin
-                    (tutcode-commit tc (string-list-concat seq))
-                    (tutcode-flush tc)
-                    (bushuconv-check-post-commit pc tc))
-                  (bushuconv-update-preedit pc))))))
+              (bushuconv-paste pc tc latter-seq))))
         ((bushuconv-acquire-former-char-key? key key-state)
           (and-let* ((char (bushuconv-acquire-char pc #t)))
             (tutcode-context-set-head! tc (cons char head))
