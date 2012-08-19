@@ -131,7 +131,7 @@ uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
 
 例3: 漢字候補として、「㺃䒳䒾䓔䔈䔍䔥䕃偀儆儚冪...」が表示されます(候補数659)。
 
-![例3](http://deton.github.com/uim-bushuconv/bushuconv-30.png)
+![例3](http://deton.github.com/uim-bushuconv/bushuconv-32.png)
 
 (4)最後に、候補ウィンドウに表示された中から漢字を選ぶと確定されます。
 
@@ -141,13 +141,13 @@ uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
 
 例4: 画数5の部首を追加するため、`5`キーを入力。
 
-![例4](http://deton.github.com/uim-bushuconv/bushuconv-305.png)
+![例4](http://deton.github.com/uim-bushuconv/bushuconv-325.png)
 
 例5: 部首として、"禾"を選択(`3`キーを入力)。
 
 例6: 漢字候補として、「莠菌萎萩萪蓁蘇蘓莉藊穫薐...」が表示されます(候補数18)。
 
-![例6](http://deton.github.com/uim-bushuconv/bushuconv-3050.png)
+![例6](http://deton.github.com/uim-bushuconv/bushuconv-3250.png)
 
 例7: 漢字として、「萪」を確定(`g`キーを入力)。
 
