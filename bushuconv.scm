@@ -594,6 +594,8 @@
                   'ksc5601)
                 ((string=? "\x1b;$A" (substring jisstr 0 3))
                   'gb2312)
+                ((string=? "\x1b;$B" (substring jisstr 0 3))
+                  'jisx0208) ; jis3str側でマッチするはずだけど念のため
                 (else
                   'unicode)))
             'unicode))))))
