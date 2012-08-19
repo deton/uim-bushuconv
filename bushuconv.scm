@@ -272,31 +272,28 @@
         (length tutcode-heading-label-char-list-for-prediction)
         tutcode-nr-candidate-max-for-prediction))
     (let ((pc (bushuconv-context-new id im))
-          (tc (tutcode-init-handler id im arg))
-          (releasing? #f))
+          (tc (tutcode-init-handler id im arg)))
       (im-set-delay-activating-handler! im bushuconv-delay-activating-handler)
       (bushuconv-context-set-tc! pc tc)
       (tutcode-context-set-state! tc 'tutcode-state-interactive-bushu)
       (if bushuconv-on-selection
-        (let ((sel (tutcode-selection-acquire-text-wo-nl tc)))
+        (let ((sel (tutcode-selection-acquire-text-wo-nl tc))
+              (save-switch bushuconv-switch-default-im-after-commit))
           (if (pair? sel)
-            (set! releasing?
-              (and (not (bushuconv-paste pc tc sel))
-                   bushuconv-switch-default-im-after-commit)))))
-      ;; U+XXXXXを選択して、bushuconv IMに切り替えた際に、対応する文字が
-      ;; commitされて、かつbushuconv-switch-default-im-after-commitが#tの場合、
-      ;; default-imにim-switch-imするので、候補ウィンドウは表示しない。
-      ;; XXX: この場合、直後のキー入力がdefault-im側に渡らない。
-      (if (not releasing?)
-        (begin
-          ;; XXX:ここでstroke-help windowを表示しても中身空
-          (tutcode-update-preedit tc)
-          ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
-          ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する
-          ;; (widgetの初期化が完了する前にdefault-activityが呼ばれるのが原因?)
-          (if (tutcode-candidate-window-enable-delay? tc
-                tutcode-candidate-window-activate-delay-for-stroke-help)
-            (bushuconv-context-set-widgets! pc bushuconv-widgets))))
+            (begin
+              ;; U+XXXXXを選択して、bushuconv IMに切り替えた際に、対応する文字が
+              ;; commitされて、かつbushuconv-switch-default-im-after-commitが#t
+              ;; だと、直後のキー入力がdefault-im側に渡らない問題を回避するため
+              (set! bushuconv-switch-default-im-after-commit #f)
+              (bushuconv-paste pc tc sel)
+              (set! bushuconv-switch-default-im-after-commit save-switch)))))
+      (tutcode-update-preedit tc);XXX:ここでstroke-help windowを表示しても中身空
+      ;; XXX: tutcode-candidate-window-use-delay?が#fの場合、
+      ;; bushuconvに切替えた時にwidget-configurationでerrorが発生する
+      ;; (widgetの初期化が完了する前にdefault-activityが呼ばれるのが原因?)
+      (if (tutcode-candidate-window-enable-delay? tc
+            tutcode-candidate-window-activate-delay-for-stroke-help)
+        (bushuconv-context-set-widgets! pc bushuconv-widgets))
       pc)))
 
 (define (bushuconv-release-handler pc)
@@ -438,11 +435,8 @@
       (begin
         (tutcode-commit tc (string-list-concat seq))
         (tutcode-flush tc)
-        (bushuconv-check-post-commit pc tc)
-        #f)
-      (begin
-        (bushuconv-update-preedit pc)
-        #t))))
+        (bushuconv-check-post-commit pc tc))
+      (bushuconv-update-preedit pc))))
 
 (define (bushuconv-key-press-handler pc key key-state)
   (define (change-help-index pc tc num)
