@@ -1,9 +1,8 @@
+#!/bin/sh
+grep '^;;' bushu34h.rev.utf-8 | sed -e 's/;;{\([+UA-F0-9]*\)}/\1/' | \
+grep -v '^;;' | LANG=C sed -e 's/	\([^    ]*\)	*;.*$/\1/' | \
+$PWD/../tools/uimsh-ucs.scm >part2
 
-sed '1,13147d' bushu34h.rev.utf-8>a
-sed -e 's/;;{\([+UA-F0-9]*\)}/\1/' a>b
-LANG=C sed -e 's/       \([^    ]*\)    *;.*$/\1/' b>c
-./ucs2utf8 <c>d
+grep -v '^;;' bushu34h.rev.utf-8 >part1
 
-sed '13147,$d' bushu34h.rev.utf-8>z
-
-cat z d>bushu34h+.rev.nosort
+cat part1 part2 >bushu34h+.rev.nosort
