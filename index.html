@@ -1,50 +1,102 @@
 <!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Uim-bushuconv by deton</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  </head>
-  <body>
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
 
-      <header>
-        <h1>Uim-bushuconv</h1>
-        <p>Bushu conversion input method for uim.</p>
-      </header>
+  <title>Uim-bushuconv</title>
+  <meta name="description" content="Bushu conversion input method for uim.">
 
-      <div id="banner">
-        <span id="logo"></span>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-        <a href="https://github.com/deton/uim-bushuconv" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/deton/uim-bushuconv/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/deton/uim-bushuconv/tarball/master" class="button">TAR</a></li>
-          </ul>
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Uim-bushuconv</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Bushu conversion input method for uim.</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/deton/uim-bushuconv/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/deton/uim-bushuconv/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/deton/uim-bushuconv" class="code">View Uim-bushuconv on GitHub</a>
         </div>
-      </div><!-- end banner -->
-
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        <h1>uim-bushuconv</h1>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>uim-bushuconv</h1>
 
 <p>uim-bushuconvは、部首合成変換を行うための
 <a href="http://code.google.com/p/uim/">uim</a>用IMです。</p>
 
-<h1>インストール</h1>
+<p>uim-tutcodeの対話的な部首合成変換機能を使っています。</p>
+
+<h2>特徴</h2>
+
+<ul>
+<li>
+<p>複数の部首を指定することで、漢字候補の絞り込みが可能</p>
+
+<ul>
+<li>"木"→「㒒㗚㭭㭷㮇㮈㮍㮤㮶㯃㯍㯰㰏䆿䈎䒳䯂休余來保傈傑...」(候補数859)</li>
+<li>"木口"→「杏呆枴枷枸柷栝格桔桮梏梧椥莕㗚保枲架㭭枳柗桐...」(候補数98)</li>
+</ul>
+</li>
+<li>
+<p>漢字の一部を部首として使って合成可能</p>
+
+<p>入力された漢字を分解した部首の集合から合成可能な漢字を候補として表示します。</p>
+
+<ul>
+<li>"菊浦"→「葡蒲薄礴莆匍蔛芍蒗薢葯莍萢藩澥粱菟瀟瀺角々籵范茫莎菏菠菹萍...」</li>
+<li>"修月"→「脩滫儕肜佾侑俏偦散胕僩撒繖胗腋腑膨霰㑪偂膺膄膠徹㬚撤澈轍鬜...」</li>
+</ul>
+<p>部首の引き算をして合成される漢字も候補に表示します。</p>
+
+<ul>
+<li>"陶阿"→「匋勹缶可」</li>
+</ul>
+</li>
+<li>
+<p>漢字の合成に使う部首をクリップボードやセレクションやカーソル前後から取得可能</p>
+
+<ul>
+<li>複数の部首をクリップボードからペーストして入力可能。</li>
+<li>複数の部首を含むセレクション文字列を使った部首合成変換可能。</li>
+<li>カーソル前後の文字を取得して部首として使用可能。</li>
+</ul>
+<p>ペーストする/セレクション文字列として選択しておくのは、
+部首だけにする必要はなく、部首を含む漢字でOK。
+また、クリップボードやセレクションからの部首取得時に、
+UnicodeコードポイントのU+XXXXX表記があれば、対応する文字に置換します。</p>
+
+<p>例:「觴」を合成する部首として、「傷」を入力したいが、
+画数を数えて部首を選ぶのが面倒な場合、通常のIMで文字入力後に、
+以下の3種類の方法でuim-bushuconv側で取得可能。</p>
+
+<ul>
+<li>uim-bushuconvに切り替え後に「角傷」の2文字をペースト。</li>
+<li>エディタに「角傷」を入力・選択後にuim-bushuconvに切り替え。</li>
+<li>エディタに「角傷」を入力後にuim-bushuconvに切り替えて、
+<code>&lt;Control&gt;R</code>を2回押してカーソル前の2文字を取得。</li>
+</ul>
+</li>
+<li><p>カーソル前の文字のUnicodeコードポイントや漢字集合
+(jisx0208,jisx0213,jisx0212等)を調べることが可能</p></li>
+<li><p>画数ごとの部首リストから選択(部首の読み方がわからなくてもOK)</p></li>
+</ul><h1>インストール</h1>
 
 <p>./install.sh</p>
 
@@ -58,45 +110,421 @@
 「ホットキーによる入力方式の一時切り替えを有効にする」を
 チェックしてください。</p>
 
-<h1>使用方法</h1>
+<p>クリップボードから部首のペーストを行うには、
+「TUT-Code キー設定1」→「クリップボードから貼り付け」キーに
+<code>&lt;Control&gt;v</code>等を設定してください。</p>
+
+<p>なお、クリップボードやセレクションやカーソル前後の文字列の取得は、
+uimのtext acquisition API(surrounding text API)に対応した
+以下のブリッジでのみ動作します。</p>
+
+<ul>
+<li>uim-gtk</li>
+<li>uim-qt4</li>
+<li>uim-qt3</li>
+<li>MacUIM 0.6.15-1</li>
+</ul><h1>使用方法</h1>
+
+<h2>セレクション文字列から変換する場合の例</h2>
+
+<p>(a)テキストエディタ等の入力エリアで「サ科」を入力します。</p>
+
+<p>(b)<code>&lt;Shift&gt;←</code>キー等を使って、「サ科」を選択します。</p>
+
+<p>(c)uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
+(アイコン: <img src="https://github.com/deton/uim-bushuconv/raw/master/pixmaps/bushuconv.png" alt="アイコン">)
+に切り替えます。</p>
+
+<p>(d)漢字候補として、「萪莠菌萎萩蓁蘇蘓莉藊蔛穫薐...」が表示されます(候補数19)。</p>
+
+<p>(e)漢字として、「萪」を確定(<code>a</code>キーを入力)。</p>
+
+<h2>部首を画数から選択する場合</h2>
 
 <p>uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
 (アイコン: <img src="https://github.com/deton/uim-bushuconv/raw/master/pixmaps/bushuconv.png" alt="アイコン">)
 に切り替えます。</p>
 
-<h1>キーと処理の対応</h1>
+<p>(1)最初に、部首の画数に対応するキーを入力してください。
+画数ごとに部首を分けています。</p>
+
+<p><img src="http://deton.github.com/uim-bushuconv/bushuconv-top.png" alt="例0"></p>
+
+<p>例1: 画数3の部首を選ぶため、<code>3</code>キーを入力。</p>
+
+<p>最初に入力するキーと画数の対応は以下。</p>
 
 <ul>
-<li>1    画数1の部首候補を表示</li>
-<li>2    画数2の部首候補を表示</li>
-<li>3    画数3の部首候補を表示</li>
-<li>4    画数4の部首候補を表示</li>
-<li>5    画数5の部首候補を表示</li>
-<li>6    画数6の部首候補を表示</li>
-<li>7    画数7の部首候補を表示</li>
-<li>8    画数8の部首候補を表示</li>
-<li>9    画数9の部首候補を表示</li>
-<li>0    画数10の部首候補を表示</li>
-<li>q    画数11の部首候補を表示</li>
-<li>w    画数12の部首候補を表示</li>
-<li>e    画数13の部首候補を表示</li>
-<li>r    画数14の部首候補を表示</li>
-<li>t    画数15の部首候補を表示</li>
-<li>y    画数17の部首候補を表示</li>
-<li>u    その他の部首候補を表示</li>
-<li>~      デフォルトのIMに切り替える</li>
+<li>1-9  画数1-9の部首候補</li>
+<li>0    画数10の部首候補</li>
+<li>q    画数11の部首候補</li>
+<li>w    画数12の部首候補</li>
+<li>e    画数13の部首候補</li>
+<li>r    画数14の部首候補</li>
+<li>t    画数15の部首候補</li>
+<li>y    画数16の部首候補</li>
+<li>u    画数17の部首候補</li>
+<li>i    画数18の部首候補</li>
+<li>o    画数19の部首候補</li>
+<li>p    画数19の部首候補他("3":「蟲」「毳」「橸」等、同じ部品を3つ含む漢字の合成用)</li>
+</ul><p>(2)次に、候補ウィンドウに表示されている、その画数の部首候補から、
+目あての部首を選択するか、
+候補ウィンドウ上で表示されているラベルキーを入力してください。</p>
+
+<p>例2: 部首として、"艹"を選択(<code>2</code>キーを入力)。</p>
+
+<p><img src="http://deton.github.com/uim-bushuconv/bushuconv-3.png" alt="例2"></p>
+
+<p>(3)そうすると、選択された部首を使って合成可能な漢字の候補が表示されます。</p>
+
+<p>例3: 漢字候補として、「㺃䒳䒾䓔䔈䔍䔥䕃偀儆儚冪...」が表示されます(候補数659)。</p>
+
+<p><img src="http://deton.github.com/uim-bushuconv/bushuconv-32.png" alt="例3"></p>
+
+<p>(4)最後に、候補ウィンドウに表示された中から漢字を選ぶと確定されます。</p>
+
+<p>(5)なお、(3)の状態で、続けて新たな部首を入力((1)からの手順と同様)すると、
+入力した全ての部首を使って合成可能な漢字の候補が表示されます。
+つまり、部首を追加していくことで、漢字候補を絞り込むことができます。</p>
+
+<p>例4: 画数5の部首を追加するため、<code>5</code>キーを入力。</p>
+
+<p><img src="http://deton.github.com/uim-bushuconv/bushuconv-325.png" alt="例4"></p>
+
+<p>例5: 部首として、"禾"を選択(<code>3</code>キーを入力)。</p>
+
+<p>例6: 漢字候補として、「莠菌萎萩萪蓁蘇蘓莉藊穫薐...」が表示されます(候補数18)。</p>
+
+<p><img src="http://deton.github.com/uim-bushuconv/bushuconv-3250.png" alt="例6"></p>
+
+<p>例7: 漢字として、「萪」を確定(<code>g</code>キーを入力)。</p>
+
+<p>(6)なお、新たに入力した部首を組み合わせると何も合成できない場合は、
+その部首は部首リストに追加されません。</p>
+
+<p>例8: 例6の状態で、<code>4</code> <code>4</code> と入力して、部首として"王"を選択しても、
+"王"は部首リストに追加されず、"艹禾"を対象とした漢字候補が再表示されます。</p>
+
+<h1>部首の代替文字</h1>
+
+<p>セレクション文字列やクリップボードからの貼り付けを行うため、
+通常のIMで部首を入力する際、
+"艹"(くさかんむり)等の部首は入力しにくいので、"サ"等の文字で代替可能です。</p>
+
+<p>以下に代替文字の例を挙げます。
+代替文字がある場合は、選択中の部首の
+<a href="#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA%E9%A0%85%E7%9B%AE%E8%A8%BB%E9%87%88">註釈表示</a>
+内の漢字候補の先頭あたりに表示されます。</p>
+
+<ul>
+<li>1丨</li>
+<li>4丩</li>
+<li>5丂</li>
+<li>、丶</li>
+<li>え辶</li>
+<li>し乀</li>
+<li>へ𠆢</li>
+<li>ア阝</li>
+<li>イ亻(にんべん)</li>
+<li>ウ宀</li>
+<li>オ扌(てへん)</li>
+<li>サ艹(くさかんむり)</li>
+<li>シ氵(さんずい)</li>
+<li>チ千</li>
+<li>リ刂(りっとう)</li>
+<li>ワ冖(わかんむり)</li>
+<li>ン冫(にすい)</li>
+</ul><h1>入力状態</h1>
+
+<p>以下の2つの入力状態があります。
+各状態で、使用可能なキーが異なります。</p>
+
+<ul>
+<li>
+<p>部首画数選択状態(1)(例0画面) + 漢字選択状態(3)(4)(5)(例3、例6画面)</p>
+
+<p>「▼」のみや、「▼サ=&gt;茜」のように、
+漢字候補が下線付きで<code>=&gt;</code>の後に表示されている状態。</p>
+
+<ul>
+<li>
+<p>部首画数を指定するキー:</p>
+
+<pre><code>1 2 3 4 5  6 7 8 9 0
+q w e r t  y u i o p 
+</code></pre>
+</li>
+<li>
+<p>漢字を選択するキー: </p>
+
+<pre><code>a s d f g  h j k l ;
+z x c v b  n m , . /
+Q W E R T  Y U I O P
+A S D F G  H J K L +
+Z X C V B  N M &lt; &gt; ?
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>部首選択状態(2)(例2、例4画面)</p>
+
+<p>「▼3」や「▼サ5=&gt;茜」のように、
+直前に入力した部首画数を指定するキー(例:3や5)が
+下線付きで表示されている状態。</p>
+
+<pre><code>1 2 3 4 5  6 7 8 9 0
+q w e r t  y u i o p
+a s d f g  h j k l ;
+z x c v b  n m , . /
+Q W E R T  Y U I O P
+A S D F G  H J K L +
+Z X C V B  N M &lt; &gt; ?
+! " # $ %  &amp; ' ( ) -
+^ \ @ [ :  ] = ~ | `
+{ * } _
+</code></pre>
+</li>
+</ul><h1>キーと処理の対応</h1>
+
+<ul>
+<li>
+<code>&lt;Control&gt;g</code>  デフォルトのIMに切り替える</li>
+<li>
+<code>tab</code>         変換前の部首を確定する</li>
+<li>
+<code>left</code>        変換前の部首をUnicodeコードポイント"U+xxxx"として確定する</li>
+<li>
+<code>right</code>       選択中の漢字候補を部首として使って、部首合成変換を行う</li>
+<li>
+<code>&lt;Control&gt;r</code>  カーソル前の文字を部首として取得する
+(押した回数に応じて取得位置が左に移動。例:2回押すと2個左の文字を取得)</li>
+<li>
+<code>&lt;Control&gt;s</code>  カーソル後の文字を部首として取得する
+(押した回数に応じて取得位置が右に移動)</li>
+<li>
+<code>&lt;Control&gt;l</code>  <code>&lt;Control&gt;r</code>、<code>&lt;Control&gt;s</code>の文字取得位置をカーソル位置に戻す</li>
 </ul><h1>カスタマイズ項目</h1>
 
 <ul>
-<li>コミット後にデフォルトIMに切り替えるかどうか (デフォルト: #f)</li>
+<li>
+<p>漢字集合 (デフォルト: "JIS X 0213")</p>
+
+<ul>
+<li>"JIS X 0213": JIS第3・第4水準(第1・第2水準(JIS X 0208)を含む)</li>
+<li>"JIS X 0213 and 0212": JIS第3・第4水準とJIS補助漢字(と一部のUnicode)</li>
 </ul>
-      </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/deton">deton</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
-      </footer>
+<p>ただし、"JIS X 0213 and 0212"は、uim-1.8.2ではエラー発生。
+uim_look_look_internal()内のバッファサイズが4096バイトで、
+index2ファイルのそれ以上の長さの行がUTF-8文字の途中で切られるため。</p>
+
+<p>JIS X 0212やJIS X 0213の文字を使う場合は、該当文字が含まれるフォントを
+使わないと、文字が正しく表示されません(白い四角で表示されたりします)。
+(TrueTypeフォントの場合、VLゴシックではJIS X 0213に未対応文字多数。
+OpenTypeフォントPr6/Pr6N(Adobe-Japan1-6対応フォント)なら
+JIS X 0212にも対応しているはず)</p>
+</li>
+<li><p>漢字確定後にデフォルトIMに切り替えるかどうか (デフォルト: #t)</p></li>
+<li><p>uim-bushuconvへ切替時、セレクション文字列を使って部首合成変換するか (デフォルト: #t)</p></li>
+<li><p>uim-bushuconvへ切替時、カーソル前の文字の註釈情報を表示するか (デフォルト: #t)</p></li>
+<li>
+<p>部首1つの時にindex2ファイルのみ使用するかどうか (デフォルト: #f)</p>
+
+<p>遅いマシン用に、部首1つの時の漢字候補リストとして、
+index2ファイルを検索して得られたものだけを使います。
+ただし、部首に含まれる部品は漢字候補に含まれなくなります。</p>
+</li>
+<li>
+<p>bushu.helpファイル</p>
+
+<p>部首合成変換用ユーザ辞書(UTF-8)。
+このファイルの内容を優先して漢字候補に出します。
+部首2文字からの合成のみ記述可能です。
+(サンプルファイル: bushudict/bushu.help.sample)</p>
+
+<p>例:"猟"と"・"や、"独"と"鼠"で"獵"を合成したい場合、
+以下の行を追加してください。
+逆の順番("鼠"と"独")でも合成したい場合は、後ろに"*"を付けてください。</p>
+
+<pre><code>獵猟・ 独鼠*
+</code></pre>
+</li>
+</ul><h2>カスタマイズ項目(uim-tutcode)</h2>
+
+<p>uim-tutcodeの対話的な部首合成変換機能を使っているので、
+uim-tutcode側の設定が反映されます。</p>
+
+<ul>
+<li>部首選択時の候補表示数:記号モードにおいて候補ウィンドウに一度に表示する候補数 (縦・横候補ウィンドウ時のデフォルト: 10)</li>
+<li>部首から合成される漢字候補表示数:補完/予測において候補ウィンドウに一度に表示する候補数 (縦・横候補ウィンドウ時のデフォルト: 10)</li>
+</ul><h2>カスタマイズ項目(註釈)</h2>
+
+<p>註釈を有効にすると、選択中の漢字のUnicodeコードポイントや、
+漢字集合(jisx0208,jisx0213-1,jisx0213-2,jisx0212等)を註釈として表示します。</p>
+
+<p>ただし、表形式の候補ウィンドウは註釈表示に未対応です。</p>
+
+<h1>コマンドラインツール</h1>
+
+<h2>tools/uimsh-bushuconv.scm: 部首合成変換</h2>
+
+<ul>
+<li>入力: 部首リスト</li>
+<li>出力: 合成される漢字の候補</li>
+</ul><p>実行例:</p>
+
+<pre><code>$ echo '木刀' | $PWD/tools/uimsh-bushuconv.scm
+朷枌枴梛棻棼楔檞梁棃𥱋樑簗蔾
+$ echo '口木イ' | $PWD/tools/uimsh-bushuconv.scm
+保堡葆褒褓
+</code></pre>
+
+<h2>tools/uimsh-kanjiset.scm: 漢字集合の判定</h2>
+
+<ul>
+<li>入力: 漢字リスト</li>
+<li>出力: 漢字集合(jisx0208,jisx0213-1,jisx0213-2,jisx0212,ksc5601,gb2312,unicode,ascii)</li>
+</ul><p>実行例:</p>
+
+<pre><code>$ echo '休鷗匋褱閒强髙a' | $PWD/tools/uimsh-kanjiset.scm
+jisx0208 jisx0213-1 jisx0213-2 jisx0212 ksc5601 gb2312 unicode ascii
+</code></pre>
+
+<h2>tools/uimsh-ucs.scm: UnicodeコードポイントのU+XXXXX表記の置換</h2>
+
+<ul>
+<li>入力: 文字列</li>
+<li>出力: UnicodeコードポイントのU+XXXXX表記を対応する文字に置換した文字列</li>
+</ul><p>実行例:</p>
+
+<pre><code>$ echo '例えば、U+8a3bU+91c8とか' | nkf -w | $PWD/uimsh-ucs.scm
+例えば、註釈とか
+</code></pre>
+
+<h2>tools/uimsh-rk.scm: ローマ字かな変換</h2>
+
+<ul>
+<li>入力: ローマ字文字列</li>
+<li>出力: かな文字列(EUC-JP)</li>
+</ul><p>オプション:</p>
+
+<ul>
+<li>-k, --katakana  カタカナで出力する。</li>
+<li>-n              "nna"を"んあ"でなく"んな"に変換する。</li>
+</ul><p>実行例:</p>
+
+<pre><code>$ $PWD/uimsh-rk.scm -n shinnyuu
+しんにゅう
+</code></pre>
+
+<h1>BUGS</h1>
+
+<ul>
+<li><p>uim-tutcodeの対話的な部首合成変換機能では、
+部首を2つ以上使って漢字を合成することが想定されているため、
+部首1つの場合に表示される漢字候補は少ない場合があります。
+特に、画数ごとの部首リストに出てこない漢字を
+部首としてペーストした場合(例:「微」に対し候補数7:「屼兀一儿山彳攵」)。
+この場合は、2つめの部首を指定すると漢字候補が増えることがあります
+(例:「微王」に対し候補数41:「徴懲澂尫珖皝玫徨尩玩玵珧瑞菫玲珩珮琛...」)。</p></li>
+<li><p>漢字辞典の部首とは異なる場合があります。
+uim-bushuconvで使用している、
+<a href="http://code.google.com/p/uim-doc-ja/wiki/UimTutcode#%E5%AF%BE%E8%A9%B1%E7%9A%84%E3%81%AA%E9%83%A8%E9%A6%96%E5%90%88%E6%88%90%E5%A4%89%E6%8F%9B">uim-tutcodeの対話的な部首合成変換機能</a>は、
+もともとEmacs用の漢字直接入力環境tc2で作られたものです。
+つまり、漢字直接入力方式のT-Code等で直接入力可能な漢字を部品として使って
+漢字を合成することを意図したものなので、
+漢字辞典の部首とは異なる場合があります。</p></li>
+<li><p>Unicodeの結合文字(例:U+30AB U+309A:カ゚)や
+IVS(例:U+908A U+E0107:邊󠄇)には未対応です。</p></li>
+<li>
+<p>クリップボードから部首のリストをペーストした際や、
+セレクション文字列を部首のリストとして使う場合、
+部首のリストの途中で、その部首を組み合わせると何も合成できなくなる場合、
+以降の部首は無視されます
+(期待する動作は、その部首だけスキップ)。</p>
+
+<p><code>&lt;Control&gt;r</code>による部首取得を使えば、
+途中に無視される部首があっても次の部首を取得することが可能です。</p>
+</li>
+<li>
+<p>補助漢字(JIS X 0212)(とUnicode少し)を含む部首合成変換辞書
+(bushu34h+.{index2,expand})は、(4096バイト以上の)長い行があるため、
+UTF-8文字の途中までしか読み込まれずエラーが発生します。</p>
+
+<p>なお、bushu34.index2でも、"口"を含む漢字のリストが長すぎるため、
+エラーが発生しないように、簡単に入力できそうな漢字は削ってあります。</p>
+</li>
+<li>
+<p>漢字候補が多いと処理がかなり遅くなります("口"や"木"等)。
+~/.uimに以下を追加するとsortを省略するので少し速くなります。</p>
+
+<pre><code>(set! tutcode-bushu-sort! (lambda (seq less?) seq))
+</code></pre>
+</li>
+<li><p>縦候補ウィンドウ上で最初から選択されている候補をクリックしても、
+確定されません。
+(選択済候補の再選択とみなされて、IM側に候補選択通知が来ないため。
+かといって、最初に何も選択しないようにすると、
+どの候補をクリックしても候補選択通知が来なくなるし)</p></li>
+</ul><h1>参考</h1>
+
+<ul>
+<li>
+<p><a href="http://x0213.org/searchkanji/">漢字検索</a></p>
+
+<p>部首名(例:「のぎへん」)、読み、総画数等を組み合わせて漢字の検索が可能なWebサイト。</p>
+</li>
+<li><p>uim-chardict-qt4</p></li>
+<li>
+<p><a href="http://deton.github.com/uim-bushuconv/tc-2.3.1-22.6.tar.gz">tc-2.3.1-22.6</a></p>
+
+<p><a href="http://gitatsu.hp.infoseek.co.jp/tcode/tc-2.3.1-22.6.tar.gz">http://gitatsu.hp.infoseek.co.jp/tcode/tc-2.3.1-22.6.tar.gz</a>
+で公開されていたアーカイブのコピーを
+<a href="http://deton.github.com/uim-bushuconv/tc-2.3.1-22.6.tar.gz">http://deton.github.com/uim-bushuconv/tc-2.3.1-22.6.tar.gz</a>
+に置きました。</p>
+</li>
+<li><p>EmacsのM-x describe-char</p></li>
+<li><p><a href="https://addons.mozilla.org/ja/firefox/addon/3929">FirefoxのCharacter Identifier addon</a></p></li>
+</ul><h1>謝辞</h1>
+
+<p>各漢字を構成する部品(部首)を記述した部首合成変換辞書は、
+tc-2.3.1-22.6に含まれるものを使わせてもらっています。
+また、部首合成変換アルゴリズムもtc-2.3.1-22.6から移植したものです。
+tc2を作成・メンテナンスされているtcode-mlの方々、
+JIS X 0213, JIS X 0212対応の辞書bushu34h.revを作成された矢木さんに感謝します。</p>
+
+<p>註釈の訓読み、音読み、意味のデータは、
+<a href="http://unicode.org/Public/UNIDATA/Unihan.zip">http://unicode.org/Public/UNIDATA/Unihan.zip</a> 内の
+Unihan_Readings.txtを変換したものを使っています。</p>
+
+<pre><code># Unihan_Readings.txt
+# Date: 2011-08-08 22:10:53 GMT [JHJ]
+# Unicode version: 6.1.0
+#
+# Unicode Character Database
+# Copyright (c) 1991-2011 Unicode, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
+</code></pre>
+        </article>
+      </div>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
-    
-  </body>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/deton" class="avatar"><img src="https://secure.gravatar.com/avatar/c7f25f1d827022520ef57feba35c060c?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" width="48" height="48"/></a> <a href="https://github.com/deton">deton</a> maintains <a href="https://github.com/deton/uim-bushuconv">Uim-bushuconv</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/deton/uim-bushuconv/tarball/master" class="tar">tar</a><a href="https://github.com/deton/uim-bushuconv/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
 </html>
