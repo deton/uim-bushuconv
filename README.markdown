@@ -1,7 +1,7 @@
 uim-bushuconv
 =============
 
-uim-bushuconvは、部首合成変換を行うための
+uim-bushuconvは、複数の部首から漢字を合成する、部首合成変換を行うための
 [uim](http://code.google.com/p/uim/)用IMです。
 
 uim-tutcodeの対話的な部首合成変換機能を使っています。
@@ -13,6 +13,7 @@ uim-tutcodeの対話的な部首合成変換機能を使っています。
 
     + "木"→「㒒㗚㭭㭷㮇㮈㮍㮤㮶㯃㯍㯰㰏䆿䈎䒳䯂休余來保傈傑...」(候補数859)
     + "木口"→「杏呆枴枷枸柷栝格桔桮梏梧椥莕㗚保枲架㭭枳柗桐...」(候補数98)
+    + "木口イ"→「保堡葆褒褓」(候補数5)
 
 * 漢字の一部を部首として使って合成可能
 
@@ -28,7 +29,7 @@ uim-tutcodeの対話的な部首合成変換機能を使っています。
 * 漢字の合成に使う部首をクリップボードやセレクションやカーソル前後から取得可能
 
     + 複数の部首をクリップボードからペーストして入力可能。
-    + 複数の部首を含むセレクション文字列を使った部首合成変換可能。
+    + 複数の部首を含むセレクション文字列を取得して部首合成変換可能。
     + カーソル前後の文字を取得して部首として使用可能。
 
     ペーストする/セレクション文字列として選択しておくのは、
@@ -38,7 +39,7 @@ uim-tutcodeの対話的な部首合成変換機能を使っています。
 
     例:「觴」を合成する部首として、「傷」を入力したいが、
     画数を数えて部首を選ぶのが面倒な場合、通常のIMで文字入力後に、
-    以下の3種類の方法でuim-bushuconv側で取得可能。
+    以下の3種類の方法でuim-bushuconv側から取得可能。
 
     + uim-bushuconvに切り替え後に「角傷」の2文字をペースト。
     + エディタに「角傷」を入力・選択後にuim-bushuconvに切り替え。
@@ -46,7 +47,7 @@ uim-tutcodeの対話的な部首合成変換機能を使っています。
       `<Control>R`を2回押してカーソル前の2文字を取得。
 
 * カーソル前の文字のUnicodeコードポイントや漢字集合
-  (jisx0208,jisx0213,jisx0212等)を調べることが可能
+  (jisx0208,jisx0213,jisx0212等)を表示する機能あり
 
 * 画数ごとの部首リストから選択(部首の読み方がわからなくてもOK)
 
@@ -417,8 +418,9 @@ BUGS
     http://deton.github.com/uim-bushuconv/tc-2.3.1-22.6.tar.gz
     に置きました。
 
-* EmacsのM-x describe-char
-* [FirefoxのCharacter Identifier addon](https://addons.mozilla.org/ja/firefox/addon/3929)
+* 指定文字の情報(コードポイント等)の表示
+    * EmacsのM-x describe-char
+    * [FirefoxのCharacter Identifier addon](https://addons.mozilla.org/ja/firefox/addon/3929)
 
 謝辞
 ====
