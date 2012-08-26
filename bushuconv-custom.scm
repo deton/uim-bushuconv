@@ -35,16 +35,16 @@
                (N_ "describe char for former kanji on startup")
                (N_ "long description will be here."))
 
-(define-custom 'bushuconv-use-only-index2-for-one-bushu #f
-               '(bushuconv)
-               '(boolean)
-               (N_ "Use only index2 file for one bushu for performance")
-               (N_ "long description will be here."))
-
 (define-custom 'bushuconv-switch-default-im-after-commit #t
                '(bushuconv)
                '(boolean)
                (N_ "switch to default IM after commit")
+               (N_ "long description will be here."))
+
+(define-custom 'bushuconv-use-only-index2-for-one-bushu #f
+               '(bushuconv)
+               '(boolean)
+               (N_ "Use only index2 file for one bushu for performance")
                (N_ "long description will be here."))
 
 (define-custom 'bushuconv-switch-default-im-key '("<IgnoreCase><Control>g")
