@@ -394,7 +394,7 @@
                     bushuconv-acquire-max 0))
              (seq (ustr-former-seq ustr))
              (strlist (and (pair? seq) (bushuconv-string-to-list (car seq)))))
-            (bushuconv-context-set-acquired-strlist! pc strlist)
+            (bushuconv-context-set-acquired-strlist! pc (delete "\n" strlist))
             strlist)))
      (len (length strlist))
      (pos (bushuconv-context-acquire-pos pc))
