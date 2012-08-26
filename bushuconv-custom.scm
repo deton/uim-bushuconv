@@ -47,6 +47,12 @@
                (N_ "Use only index2 file for one bushu for performance")
                (N_ "long description will be here."))
 
+(define-custom 'bushuconv-acquire-max 10
+               '(bushuconv)
+               '(integer 1 99)
+               (N_ "Maximum number of former characters to acquire")
+               (N_ "long description will be here."))
+
 (define-custom 'bushuconv-switch-default-im-key '("<IgnoreCase><Control>g")
                '(bushuconv)
 	       '(key)

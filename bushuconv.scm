@@ -203,7 +203,8 @@
       (list 'tc #f)
       (list 'help-index 0)
       (list 'selection #f)
-      (list 'acquire-pos 0))))
+      (list 'acquire-pos 0)
+      (list 'acquired-strlist #f))))
 
 (define-record 'bushuconv-context bushuconv-context-rec-spec)
 (define bushuconv-context-new-internal bushuconv-context-new)
@@ -335,6 +336,7 @@
     (begin
       (bushuconv-context-set-selection! pc #f)
       (bushuconv-context-set-acquire-pos! pc 0)
+      (bushuconv-context-set-acquired-strlist pc #f)
       (if bushuconv-switch-default-im-after-commit
         (im-switch-im pc default-im-name)
         (begin
@@ -383,40 +385,25 @@
         (seqloop (append! result (list (car seq))) (cdr seq)))))
   (seqloop '() seq))
 
-(define (bushuconv-acquire-char pc former?)
+(define (bushuconv-acquire-char pc back?)
   (and-let*
-    ((pos (bushuconv-context-acquire-pos pc))
-     (f-l-n ; former-len latter-len next-pos
-      (cond
-        ((= pos 0)
-          (if former?
-            (list 1 0 1)
-            (list 0 1 -1)))
-        ((> pos 0)
-          (if former?
-            (list (+ pos 1) 0 (+ pos 1))
-            (list pos 0 (- pos 1))))
-        (else
-          (if former?
-            (list 0 (- 0 pos) (+ pos 1))
-            (list 0 (- 0 pos -1) (- pos 1))))))
-     (former-len (car f-l-n))
-     (latter-len (cadr f-l-n))
-     (ustr (im-acquire-text pc 'primary 'cursor former-len latter-len))
-     (seq
-      (if (> former-len 0)
-        (ustr-former-seq ustr)
-        (ustr-latter-seq ustr)))
-     (strlist (and (pair? seq) (bushuconv-string-to-list (car seq)))))
-   (if (> former-len 0)
-    (and (= former-len (length strlist))
-      (begin
-        (bushuconv-context-set-acquire-pos! pc (caddr f-l-n))
-        (last strlist)))
-    (and (= latter-len (length strlist))
-      (begin
-        (bushuconv-context-set-acquire-pos! pc (caddr f-l-n))
-        (car strlist))))))
+    ((strlist
+      (or (bushuconv-context-acquired-strlist pc)
+          (and-let*
+            ((ustr (im-acquire-text pc 'primary 'cursor
+                    bushuconv-acquire-max 0))
+             (seq (ustr-former-seq ustr))
+             (strlist (and (pair? seq) (bushuconv-string-to-list (car seq)))))
+            (bushuconv-context-set-acquired-strlist! pc strlist)
+            strlist)))
+     (len (length strlist))
+     (pos (bushuconv-context-acquire-pos pc))
+     (i (if back? pos (- pos 1))))
+    (if (or (< i 0) (<= len i))
+      #f
+      (let ((ch (list-ref strlist i)))
+        (bushuconv-context-set-acquire-pos! pc (if back? (+ i 1) i))
+        ch))))
 
 (define (bushuconv-paste pc tc paste-seq)
   ;; U+XXXXXがあったら対応する文字として貼り付け。
