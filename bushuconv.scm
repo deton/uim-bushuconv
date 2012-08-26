@@ -336,7 +336,7 @@
     (begin
       (bushuconv-context-set-selection! pc #f)
       (bushuconv-context-set-acquire-pos! pc 0)
-      (bushuconv-context-set-acquired-strlist pc #f)
+      (bushuconv-context-set-acquired-strlist! pc #f)
       (if bushuconv-switch-default-im-after-commit
         (im-switch-im pc default-im-name)
         (begin
