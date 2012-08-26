@@ -421,6 +421,7 @@ BUGS
 * 指定文字の情報(コードポイント等)の表示
     * EmacsのM-x describe-char
     * [FirefoxのCharacter Identifier addon](https://addons.mozilla.org/ja/firefox/addon/3929)
+    * [Vimスクリプトgetjpcharset.vim](https://github.com/deton/getjpcharset.vim)
 
 謝辞
 ====
