@@ -327,14 +327,15 @@ uim-tutcode側の設定が反映されます。
 コマンドラインツール
 ====================
 
-入力漢字コードが正しくない場合(UTF-8を期待しているのに、EUC-JPを渡した場合)、
-以下のエラーが出ます。
+入力漢字コードがUTF-8でない場合(EUC-JP等)、以下のエラーが出ます。
+
+    Error: scm_charcodec_read_char: invalid char sequence
+
+この場合は、以下の例のように、
 nkf -wやlv -Ou8やiconv -t utf-8等でUTF-8に変換した文字列を、
 各コマンドラインツールに渡してください。
 
-```
-Error: scm_charcodec_read_char: invalid char sequence
-```
+    $ cat readme.euc-jp | nkf -w | $PWD/tools/uimsh-ucs.scm
 
 tools/uimsh-bushuconv.scm: 部首合成変換
 ---------------------------------------
