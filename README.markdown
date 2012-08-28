@@ -249,7 +249,7 @@ uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
   取得位置を後ろに移動する(押した回数に応じて取得位置が後ろに移動)
 * `<Control>l`  `<Control>r`、`<Control>s`の文字取得位置をカーソル位置に戻す
 
-なお、カーソル前の文字の取得は、
+なお、`<Control>r`や`<Control>s`によるカーソル前の文字の取得は、
 [uimのtext acquisition APIに対応したブリッジ](%E6%BA%96%E5%82%99)
 でのみ動作します。
 
