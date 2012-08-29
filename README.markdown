@@ -250,7 +250,7 @@ uim-toolbarや「一時切り替えキー」を使って、bushuconv IM
 * `<Control>l`  `<Control>r`、`<Control>s`の文字取得位置をカーソル位置に戻す
 
 なお、`<Control>r`や`<Control>s`によるカーソル前の文字の取得は、
-[uimのtext acquisition APIに対応したブリッジ](%E6%BA%96%E5%82%99)
+[uimのtext acquisition APIに対応したブリッジ](#%E6%BA%96%E5%82%99)
 でのみ動作します。
 
 カーソル前の文字取得の動き
